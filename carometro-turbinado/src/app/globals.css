@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body{
+  background: linear-gradient(to bottom, #5992FF, #1262FF);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
