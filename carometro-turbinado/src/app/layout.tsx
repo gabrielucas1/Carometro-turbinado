@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className={`h-screen ${poppins.className}`}>{children}</body>
+      <body className={`h-screen flex flex-col ${poppins.className}`}>{children}</body>
     </html>
   );
 }

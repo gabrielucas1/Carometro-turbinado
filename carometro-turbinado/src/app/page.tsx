@@ -1,36 +1,33 @@
 "use client"
 
-import UsuarioDAO from "@/model/UsuarioDAO";
-import Link from "next/link";
+import Image from 'next/image';
+import logo from '../../public/images/Logo - CT.png'
+import formanda from '../../public/images/Formanda - IA - Carômetro Trubinado.png'
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, useState } from "react";
-import LogarGoogle from "../components/LogarGoogle";
-import useForm from "@/model/hooks/useForm";
 
 export default function Home() {
-  const {getInput, submitLogin, erro} = useForm()
+  //ROUTER PARA NAVEGAR
+  const router = useRouter()
+
   return (
-    <main className="flex flex-col w-screen h-screen justify-center items-center">
-      <form onSubmit={submitLogin} className="text-lg bg-white w-[400px] p-9 py-14 rounded-3xl flex flex-col justify-center items-center">
-        <h1 className="text-3xl mb-20 font-semibold">LOGIN</h1>
-        <input className="pb-1 w-full border-b-[3px] border-slate-300 placeholder:text-black placeholder:text-xl" placeholder="Email" onChange={getInput} id="email" type="email" autoComplete="email"/>
-
-        {erro.email
-          ? <p className="self-start text-red-600 text-sm">O E-mail deve conter menos 80 caracteres</p> 
-          : null
-        }
-
-        <input className="mt-10 pb-1 w-full border-b-[3px] border-slate-300 placeholder:text-black placeholder:text-xl" onChange={getInput} id="password" type="password" placeholder="Senha" autoComplete="current-password"/>
-        {erro.password
-          ? <p className="self-start text-red-600 text-sm">A senha deve conter no mínimo 6 caracteres e menos de 20 caracteres</p> 
-          : null
-        }
-        <p className="mt-2 text-base self-start font-medium">Esqueceu a senha?</p>
-
-        <button type="submit" className="text-lg mt-10 bg-[#3579FF] py-2 px-12 text-white rounded-full hover:px-14 transition-all duration-200">Logar</button>
-        <LogarGoogle></LogarGoogle>
-        <p className="mt-8 text-base">Não possui conta? <Link className="font-semibold" href="/cadastro">Clique aqui</Link></p>
-      </form>
-    </main>
-  );
+    <div className="flex flex-col h-screen">
+      <header className="w-full bg-[#3579FF] h-14">
+        <Image src={logo} alt='Logo do Carômetro Turbinado' width={80} height={0}></Image>
+      </header>
+      <main className="overflow-hidden pl-5 w-full bg-white flex-1 flex flex-row">
+        <div>
+          <h1 className='mt-11 text-[#3579FF] font-bold text-5xl'>Bem-vindo</h1>
+          <p className='pr-24 mt-12 text-2xl'>
+            Aqui no Carômetro Turbinado, você
+            encontra uma solução prática, fácil
+            e confiável para ajudar a armazenar e
+            a disponibilizar informações dos estudantes.
+            Está ponto para ter um registro aprimorado?
+          </p>
+          <button onClick={() => router.push("/login")} className="font-bold text-xl mt-12 bg-[#3579FF] py-3 px-8 text-white rounded-full hover:px-10 transition-all duration-200">Comece agora</button>
+        </div>
+        <Image className='hidden md:block' src={formanda} height={0} width={700} alt='Imagem de uma formanda' priority></Image>
+      </main>
+    </div>
+  )
 }
