@@ -15,8 +15,18 @@ export default class UsuarioDAO {
             const docRef = await addDoc(collection(db, "usuario"), {
                 idAuth: UsuarioFBDAO.usuarioAuthLogado.uid,
                 tipoUsuario: usuario.tipoUsuario,
+                nome: usuario.nome,
+                CEP: usuario.CEP,
+                rua: usuario.rua,
+                bairro: usuario.bairro,
+                complemento: usuario.complemento,
+                numeroCasa: usuario.numeroCasa,
+                estado: usuario.estado,
+                cidade: usuario.cidade,
+                dataNascimento: usuario.dataNascimento,
+                celular: usuario.celular,
             });
-            console.log("Usuário inserido com sucesso! ID: ", docRef.id);
+            console.log("Usuário inserido com sucesso!")
         } catch (e) {
             console.error("Erro ao inserir o usuário: ", e);
         }
@@ -33,7 +43,7 @@ export default class UsuarioDAO {
         }
 
         const doc = querySnapshot.docs[0]
-        usuario.id = doc.id
+
         usuario.idAuth = doc.data().idAuth
         usuario.tipoUsuario = doc.data().tipoUsuario
 
