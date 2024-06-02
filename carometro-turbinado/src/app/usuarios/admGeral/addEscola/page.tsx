@@ -2,13 +2,9 @@
 
 import escolaDAO from "@/DAOs/EscolaDAO"
 import Escola from "@/model/Escola"
-import { useRouter } from "next/navigation"
 import { ChangeEvent, useState } from "react"
 
 export default function AddEscola() {
-    //ROUTER PARA NAVEGAR
-    const router = useRouter()
-
     //ESTADO PARA GUARDAR VALORES DOS INPUTS
     const [valorInput, setValorInput] = useState({
         nome: '',
@@ -39,7 +35,7 @@ export default function AddEscola() {
     }
 
     return (
-        <div className="flex flex-col items-center w-2/4">
+        <div className="flex flex-col items-center px-96 w-full">
             <h1 className="text-3xl mt-6">Menu Principal</h1>
 
             <label className="mt-20 self-start" htmlFor="nome">Nome</label>

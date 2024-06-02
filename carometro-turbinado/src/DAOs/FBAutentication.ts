@@ -11,7 +11,16 @@ export default class FBAutentication {
     static usuarioAuthLogado: User;
 
     //RETORNO PROMISSE, PORQUE O FIREBASE USA THEN-CATCH AQUI POR PADRÃO
-    static login(email: string, password: string): Promise<boolean> {
+    static async login(email: string, password: string) {
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            this.usuarioAuthLogado = userCredential.user
+        } catch (erro) {
+            throw new Error("Erro no Login!")
+        }
+
+        /*
         return new Promise((resolve) => {
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
@@ -20,26 +29,19 @@ export default class FBAutentication {
                     resolve(true)
                 })
                 .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
+                    console.log("Login falhou!" + error)
                 });
         })
+        */
     }
 
-    static cadastro(email: string, password: string): Promise<boolean> {
-        return new Promise((resolve) => {
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // Signed up 
-                    this.usuarioAuthLogado = userCredential.user;
-                    resolve(true)
-                    // ...
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                });
-        })
+    static async cadastro(email: string, password: string) {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+            this.usuarioAuthLogado = userCredential.user
+        } catch (erro) {
+            throw new Error("Erro no Cadastro!")
+        }
     }
 
     static loginGoogle() {
@@ -54,14 +56,14 @@ export default class FBAutentication {
                     // IdP data available using getAdditionalUserInfo(result)
                     // ...
                     resolve(true)
-                }).catch((error) => {
+                }).catch((erro) => {
                     // Handle Errors here.
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
+                    const errorCode = erro.code;
+                    const errorMessage = erro.message;
                     // The email of the user's account used.
-                    const email = error.customData.email;
+                    const email = erro.customData.email;
                     // The AuthCredential type that was used.
-                    const credential = GoogleAuthProvider.credentialFromError(error);
+                    const credential = GoogleAuthProvider.credentialFromError(erro);
                     // ...
                 });
         })

@@ -1,4 +1,5 @@
 export default class Escola {
+    id: string
     nome: string
     endereco: string
     cidade: string
@@ -6,6 +7,7 @@ export default class Escola {
     tipoEnsino: string
 
     constructor() {
+        this.id = ""
         this.nome = ""
         this.endereco = ""
         this.cidade = ""

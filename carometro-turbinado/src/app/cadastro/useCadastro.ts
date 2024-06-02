@@ -1,7 +1,7 @@
 "use client"
 
 import FBAutentication from "@/DAOs/FBAutentication"
-import UsuarioDAO from "@/DAOs/UsuarioDAO"
+import usuarioDAO from "@/DAOs/UsuarioDAO"
 import TipoUsuario from "@/model/Enums/TipoUsuario"
 import Usuario from "@/model/Usuario"
 import { useRouter } from "next/navigation"
@@ -14,10 +14,10 @@ export default function useCadastro() {
 
     //ESTADOS PARA GUARDAR VALORES DOS INPUTS
     const [nome, setNome] = useState("")
-    const [email, setEmail] = useState("") 
+    const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
     const [confirmarSenha, setConfirmarSenha] = useState("")
-    
+
     const [dataNascimento, setDataNascimento] = useState("")
     const [celular, setCelular] = useState("")
     const [estado, setEstado] = useState("")
@@ -84,31 +84,46 @@ export default function useCadastro() {
 
     async function submitCadastro(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        FBAutentication.cadastro(email, senha).then((cadastrado) => {
-            if (cadastrado == true) {
-                
-                const usuario: Usuario = {
-                    idAuth: FBAutentication.usuarioAuthLogado.uid,
-                    tipoUsuario: TipoUsuario.FUNCIONARIO,
-                    nome: nome,
-                    CEP: cep,
-                    rua: rua,
-                    bairro: bairro,
-                    complemento: complemento,
-                    numeroCasa: numeroCasa,
-                    estado: estado,
-                    cidade: cidade,
-                    dataNascimento: dataNascimento,
-                    celular: celular,
-                }
-    
-                UsuarioDAO.inserir(usuario);
-
-                router.push("/outrasPaginas/principal")
+        try {
+            await FBAutentication.cadastro(email, senha)
+            const usuario: Usuario = {
+                id: "",
+                idAuth: FBAutentication.usuarioAuthLogado.uid,
+                tipoUsuario: TipoUsuario.ADMGERAL,
+                nome: nome,
+                CEP: cep,
+                rua: rua,
+                bairro: bairro,
+                complemento: complemento,
+                numeroCasa: numeroCasa,
+                estado: estado,
+                cidade: cidade,
+                dataNascimento: dataNascimento,
+                celular: celular,
             }
-        }).catch((erro) => {
-            console.log("Não foi possível saber se o cadastro foi bem sucedido!" + erro)
-        })
+
+            try {
+                await usuarioDAO.inserir(usuario)
+
+                switch (usuario.tipoUsuario) {
+                    case TipoUsuario.ADMGERAL: {
+                        router.push("/usuarios/admGeral/listaEscolas")
+                        break
+                    }
+                    case TipoUsuario.ADMESCOLA: {
+                        router.push("/usuarios/admEscola")
+                    }
+                    case TipoUsuario.FUNCIONARIO: {
+                        router.push("/usuarios/funcionario")
+                    }
+                }
+            } catch (erro: any) {
+                console.log(erro.message + erro)
+            }
+
+        } catch (erro: any) {
+            console.log(erro.message + erro)
+        }
     }
 
     return {

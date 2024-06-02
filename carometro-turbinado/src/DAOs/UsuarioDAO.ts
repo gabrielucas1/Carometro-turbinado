@@ -1,7 +1,8 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import UsuarioFBDAO from "./FBAutentication";
 import { db } from "@/firebase/firebase";
 import Usuario from "@/model/Usuario";
+import TipoUsuario from "@/model/Enums/TipoUsuario";
 
 /*
     EXISTEM 2 USUÁRIOS, PORQUE NA AUTENTICAÇÃO DO FIREBASE, SÓ É
@@ -9,11 +10,14 @@ import Usuario from "@/model/Usuario";
     ENTÃO TIVE QUE CRIAR NO BANCO FIRESTORE UM USUARIO TAMBÉM, COM
     O INTUITO DE ARMAZENAR ESSES ATRIBUTOS EXTRAS
 */
-export default class UsuarioDAO {
-    static async inserir(usuario: Usuario) {
+class UsuarioDAO {
+    async inserir(usuario: Usuario) {
         try {
-            const docRef = await addDoc(collection(db, "usuario"), {
-                idAuth: UsuarioFBDAO.usuarioAuthLogado.uid,
+            //UTILIZO O MESMO ID DA AUTENTICATION PARA LIGAR O DOCUMENTO USUÁRIO DO
+            //FIRESTORE COM O USUARIO LOGADO NO AUTENTICATION
+            const idDoc = UsuarioFBDAO.usuarioAuthLogado.uid
+
+            await setDoc(doc(db, "usuario", idDoc), {
                 tipoUsuario: usuario.tipoUsuario,
                 nome: usuario.nome,
                 CEP: usuario.CEP,
@@ -28,31 +32,81 @@ export default class UsuarioDAO {
             });
             console.log("Usuário inserido com sucesso!")
         } catch (e) {
-            console.error("Erro ao inserir o usuário: ", e);
+            throw new Error("Erro ao inserir o usuário!")
         }
     }
 
-    static async getOne(idAuth: string): Promise<Usuario | null> {
+    async getOne(id: string): Promise<Usuario> {
         const usuario = new Usuario()
-        const q = query(collection(db, "usuario"), where("id", "==", idAuth));
 
-        const querySnapshot = await getDocs(q);
+        try {
+            const docRef = doc(db, "usuario", id)
 
-        if (querySnapshot.empty) {
-            return null; // Retorna null se nenhum usuário for encontrado
+            const querySnapshot = await getDoc(docRef)
+
+            if (querySnapshot.exists()) {
+                usuario.id = querySnapshot.id
+                usuario.nome = querySnapshot.data().nome
+                usuario.celular = querySnapshot.data().celular
+                usuario.tipoUsuario = querySnapshot.data().tipoUsuario
+            } else {
+                throw new Error("O documento não existe!")
+            }
+
+            return usuario
+        } catch (e) {
+            throw new Error("Erro ao pegar um documento!")
         }
-
-        const doc = querySnapshot.docs[0]
-
-        usuario.idAuth = doc.data().idAuth
-        usuario.tipoUsuario = doc.data().tipoUsuario
-
-        return usuario
     }
 
     //GETALL
+    async getAll(): Promise<Usuario[]> {
+        try {
+            const querySnapshot = await getDocs(collection(db, "usuario"));
+            const usuarios: Usuario[] = []
+            querySnapshot.forEach((doc) => {
+                // doc.data() is never undefined for query doc snapshots
+                const usuarioData = doc.data(); // Obtém os dados do documento
+                const usuario: Usuario = new Usuario()
+
+                usuario.id = doc.id
+                usuario.idAuth = usuarioData.idAuth
+                usuario.nome = usuarioData.nome
+                usuario.celular = usuarioData.celular
+
+                usuarios.push(usuario);
+            });
+
+            return usuarios
+        } catch (e) {
+            throw new Error("Erro ao pegar todas as escolas")
+        }
+    }
 
     //UPDATE
+    async updateTipoUsuario(id: string, tipoUsuario: TipoUsuario) {
+        try {
+            const docRef = doc(db, "usuario", id)
+            await updateDoc(docRef, {
+                tipoUsuario: tipoUsuario
+            })
+            console.log("Tipo do Usuário atualizado com sucesso!")
+        } catch (e) {
+            throw new Error("Erro ao atualizar o Tipo do Usuário!")
+        }
+    }
 
     //DELETE
+    async deletar(id: string) {
+        try {
+            const docRef = doc(db, "usuario", id)
+            await deleteDoc(docRef)
+            console.log("usuário excluido com sucesso!")
+        } catch (e) {
+            throw new Error("Erro ao deletar usuário")
+        }
+    }
 }
+
+const usuarioDAO = new UsuarioDAO()
+export default usuarioDAO

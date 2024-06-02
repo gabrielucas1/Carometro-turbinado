@@ -1,4 +1,6 @@
 import FBAutentication from "@/DAOs/FBAutentication"
+import usuarioDAO from "@/DAOs/UsuarioDAO"
+import TipoUsuario from "@/model/Enums/TipoUsuario"
 import { useRouter } from "next/navigation"
 import { FormEvent, useState } from "react"
 
@@ -20,15 +22,32 @@ export default function useLogin() {
     }
 
 
-    function submitLogin(e: FormEvent<HTMLFormElement>) {
+    async function submitLogin(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        FBAutentication.login(email, senha).then((logado) => {
-            if (logado) {
-                router.push("/outrasPaginas/principal")
+        await FBAutentication.login(email, senha)
+
+        try {
+            const usuario = await usuarioDAO.getOne(FBAutentication.usuarioAuthLogado.uid)
+            if (usuario != null) {
+                switch (usuario.tipoUsuario) {
+                    case TipoUsuario.ADMGERAL: {
+                        router.push("/usuarios/admGeral/listaEscolas")
+                        break
+                    }
+                    case TipoUsuario.ADMESCOLA: {
+                        router.push("/usuarios/admEscola")
+                    }
+                    case TipoUsuario.FUNCIONARIO: {
+                        router.push("/usuarios/funcionario")
+                    }
+                }
+            } else {
+                console.log("Usuário não encontrado")
             }
-        }).catch((erro) => {
-            console.log("Não foi possível saber se o login foi bem sucedido!" + erro)
-        })
+        } catch (erro: any) {
+            console.log(erro.message + erro)
+        }
+
     }
 
     return {

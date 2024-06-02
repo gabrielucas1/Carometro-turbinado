@@ -1,6 +1,7 @@
 import TipoUsuario from "./Enums/TipoUsuario"
 
 export default class Usuario {
+    id: string
     idAuth: string
     tipoUsuario: TipoUsuario
     nome: string
@@ -15,6 +16,7 @@ export default class Usuario {
     celular: string
 
     constructor() {
+        this.id = ""
         this.idAuth = ""
         this.tipoUsuario = TipoUsuario.VAZIO
         this.nome = ""

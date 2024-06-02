@@ -3,12 +3,9 @@
 import Image from 'next/image';
 import logo from '../../public/images/Logo - CT.png'
 import formanda from '../../public/images/Formanda - IA - Carômetro Trubinado.png'
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
-  //ROUTER PARA NAVEGAR
-  const router = useRouter()
-
   return (
     <div className="flex flex-col h-screen">
       <header className="w-full bg-[#3579FF] h-14">
@@ -24,7 +21,9 @@ export default function Home() {
             a disponibilizar informações dos estudantes.
             Está ponto para ter um registro aprimorado?
           </p>
-          <button onClick={() => router.push("/login")} className="font-bold text-xl mt-12 bg-[#3579FF] py-3 px-8 text-white rounded-full hover:px-10 transition-all duration-200">Comece agora</button>
+          <Link href={"./login"}>
+            <button className="font-bold text-xl mt-12 bg-[#3579FF] py-3 px-8 text-white rounded-full hover:px-10 transition-all duration-200">Comece agora</button>
+          </Link>
         </div>
         <Image className='hidden md:block' src={formanda} height={0} width={700} alt='Imagem de uma formanda' priority></Image>
       </main>
