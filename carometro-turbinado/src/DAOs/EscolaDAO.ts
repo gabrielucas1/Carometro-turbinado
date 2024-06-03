@@ -1,5 +1,5 @@
 import { db } from "@/firebase/firebase";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, QueryOrderByConstraint, setDoc } from "firebase/firestore";
 import Escola from "@/model/Escola";
 
 class EscolaDAO {
@@ -7,9 +7,15 @@ class EscolaDAO {
     async inserir(escola: Escola) {
         try {
             const docRef = await addDoc(collection(db, "escola"), {
-                cidade: escola.cidade,
-                endereco: escola.endereco,
                 nome: escola.nome,
+                cep: escola.cep,
+                rua: escola.rua,
+                bairro: escola.bairro,
+                numeroCasa: escola.numeroCasa,
+                complemento: escola.complemento,
+                telefone: escola.telefone,
+                estado: escola.estado,
+                cidade: escola.cidade,
                 rede: escola.rede,
                 tipoEnsino: escola.tipoEnsino
             });
@@ -26,8 +32,20 @@ class EscolaDAO {
         const docRef = doc(db, "escola", id)
         const querySnapshot = await getDoc(docRef)
         if (querySnapshot.exists()) {
-            escola.nome = querySnapshot.data().nome
-            escola.endereco = querySnapshot.data().nome
+            const data = querySnapshot.data()
+
+            escola.id = querySnapshot.id
+            escola.nome = data.nome
+            escola.cep = data.cep
+            escola.rua = data.rua
+            escola.bairro = data.bairro
+            escola.numeroCasa = data.numeroCasa
+            escola.complemento = data.complemento
+            escola.telefone = data.telefone
+            escola.estado = data.estado
+            escola.cidade = data.cidade
+            escola.rede = data.rede
+            escola.tipoEnsino = data.tipoEnsino
         } else {
             throw new Error('Erro ao buscar uma escola!')
         }
@@ -41,15 +59,21 @@ class EscolaDAO {
         const escolas: Escola[] = []
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
-            const escolaData = doc.data(); // Obtém os dados do documento
+            const data = doc.data(); // Obtém os dados do documento
             const escola: Escola = new Escola()
 
             escola.id = doc.id
-            escola.nome = escolaData.nome
-            escola.endereco = escolaData.endereco
-            escola.cidade = escolaData.cidade
-            escola.rede = escolaData.rede
-            escola.tipoEnsino = escolaData.tipoEnsino
+            escola.nome = data.nome
+            escola.cep = data.cep
+            escola.rua = data.rua
+            escola.bairro = data.bairro
+            escola.numeroCasa = data.numeroCasa
+            escola.complemento = data.complemento
+            escola.telefone = escola.telefone
+            escola.estado = escola.estado
+            escola.cidade = data.cidade
+            escola.rede = data.rede
+            escola.tipoEnsino = data.tipoEnsino
 
             escolas.push(escola);
         });
@@ -58,7 +82,26 @@ class EscolaDAO {
     }
 
     //UPDATE
-    
+    async update(id: string, escola: Escola) {
+        try {
+            await setDoc(doc(db, "escola", id), {
+                nome: escola.nome,
+                cep: escola.cep,
+                rua: escola.rua,
+                bairro: escola.bairro,
+                numeroCasa: escola.numeroCasa,
+                complemento: escola.complemento,
+                telefone: escola.telefone,
+                estado: escola.estado,
+                cidade: escola.cidade,
+                rede: escola.rede,
+                tipoEnsino: escola.tipoEnsino
+            })
+            console.log("Escola atualizada com sucesso!")
+        } catch (e) {
+            throw new Error("Erro ao atualizar escola!")
+        }
+    }
 
 
     //DELETE
@@ -67,6 +110,7 @@ class EscolaDAO {
 
         try {
             await deleteDoc(docRef)
+            console.log("Escola excluida com sucesso!")
         } catch (e) {
             throw new Error("Erro ao deletar escola!")
         }

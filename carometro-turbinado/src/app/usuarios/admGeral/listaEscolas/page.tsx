@@ -27,7 +27,6 @@ export default function ListaEscola() {
                 <div key={escola.id} onClick={() => navegarPerfil(escola.id)} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
 
                     <p>{`Nome: ${escola.nome}`}</p>
-                    <p>{`Endereço: ${escola.endereco}`}</p>
 
                 </div>
             ))}

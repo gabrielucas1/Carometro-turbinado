@@ -21,7 +21,7 @@ export default function Home() {
             a disponibilizar informações dos estudantes.
             Está ponto para ter um registro aprimorado?
           </p>
-          <Link href={"./login"}>
+          <Link href={"/login"}>
             <button className="font-bold text-xl mt-12 bg-[#3579FF] py-3 px-8 text-white rounded-full hover:px-10 transition-all duration-200">Comece agora</button>
           </Link>
         </div>

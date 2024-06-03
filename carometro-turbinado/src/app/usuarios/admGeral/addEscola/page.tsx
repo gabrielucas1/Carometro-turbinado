@@ -8,8 +8,14 @@ export default function AddEscola() {
     //ESTADO PARA GUARDAR VALORES DOS INPUTS
     const [valorInput, setValorInput] = useState({
         nome: '',
-        endereco: "",
+        cep: "",
+        rua: "",
+        bairro: "",
+        numeroCasa: "",
+        estado: "",
         cidade: "",
+        complemento: "",
+        telefone: "",
         rede: "",
         tipoEnsino: "",
     })
@@ -26,8 +32,14 @@ export default function AddEscola() {
     function btAdicionar() {
         const escola = new Escola()
         escola.nome = valorInput.nome
-        escola.endereco = valorInput.endereco
+        escola.cep = valorInput.cep
+        escola.rua = valorInput.rua
+        escola.bairro = valorInput.bairro
+        escola.numeroCasa = valorInput.numeroCasa
+        escola.estado = valorInput.estado
         escola.cidade = valorInput.cidade
+        escola.complemento = valorInput.complemento
+        escola.telefone = valorInput.telefone
         escola.rede = valorInput.rede
         escola.tipoEnsino = valorInput.tipoEnsino
 
@@ -35,16 +47,52 @@ export default function AddEscola() {
     }
 
     return (
-        <div className="flex flex-col items-center px-96 w-full">
-            <h1 className="text-3xl mt-6">Menu Principal</h1>
+        <div className="flex flex-col items-center px-96 w-full h-full overflow-y-auto">
+            <h1 className="text-xl mt-6">Adicionar escola</h1>
 
-            <label className="mt-20 self-start" htmlFor="nome">Nome</label>
+            <label className="mt-10 self-start" htmlFor="nome">Nome</label>
             <input onChange={getInput} className="border-2 w-full rounded h-10" id="nome" type="text" />
 
             <div className="w-full flex flex-row gap-5">
                 <div className="flex flex-col flex-1">
-                    <label className="mt-10 self-start" htmlFor="endereco">Endereço</label>
-                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="endereco" type="text" />
+                    <label className="mt-10 self-start" htmlFor="cep">CEP</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="cep" type="text" />
+                </div>
+
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="rua">Rua</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="rua" type="text" />
+                </div>
+            </div>
+
+            <div className="w-full flex flex-row gap-5">
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="bairro">Bairro</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="bairro" type="text" />
+                </div>
+
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="numeroCasa">Numero da casa</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="numeroCasa" type="text" />
+                </div>
+            </div>
+
+            <div className="w-full flex flex-row gap-5">
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="complemento">Complemento</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="complemento" type="text" />
+                </div>
+
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="telefone">Telefone</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="telefone" type="text" />
+                </div>
+            </div>
+
+            <div className="w-full flex flex-row gap-5">
+                <div className="flex flex-col flex-1">
+                    <label className="mt-10 self-start" htmlFor="estado">Estado</label>
+                    <input onChange={getInput} className="border-2 w-full rounded h-10" id="estado" type="text" />
                 </div>
 
                 <div className="flex flex-col flex-1">
@@ -65,7 +113,7 @@ export default function AddEscola() {
                 </div>
             </div>
 
-            <button onClick={btAdicionar} type="submit" className="text-lg mt-20 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Adicionar</button>
+            <button onClick={btAdicionar} type="submit" className="text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Adicionar</button>
         </div>
     )
 }
