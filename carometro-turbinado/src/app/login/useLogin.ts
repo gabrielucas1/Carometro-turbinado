@@ -27,7 +27,7 @@ export default function useLogin() {
         await FBAutentication.login(email, senha)
 
         try {
-            const usuario = await usuarioDAO.getOne(FBAutentication.usuarioAuthLogado.uid)
+            const usuario = await usuarioDAO.getOne(FBAutentication.usuarioLogado.id)
             if (usuario != null) {
                 switch (usuario.tipoUsuario) {
                     case TipoUsuario.ADMGERAL: {

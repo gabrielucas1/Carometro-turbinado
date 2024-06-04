@@ -1,9 +1,10 @@
 import TipoUsuario from "./Enums/TipoUsuario"
+import Escola from "./Escola"
 
 export default class Usuario {
     id: string
-    idAuth: string
     tipoUsuario: TipoUsuario
+    escola: Escola
     nome: string
     CEP: string
     rua: string
@@ -17,8 +18,8 @@ export default class Usuario {
 
     constructor() {
         this.id = ""
-        this.idAuth = ""
         this.tipoUsuario = TipoUsuario.VAZIO
+        this.escola = new Escola()
         this.nome = ""
         this.CEP = ""
         this.rua = ""

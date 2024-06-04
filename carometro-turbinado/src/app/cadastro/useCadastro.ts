@@ -3,6 +3,7 @@
 import FBAutentication from "@/DAOs/FBAutentication"
 import usuarioDAO from "@/DAOs/UsuarioDAO"
 import TipoUsuario from "@/model/Enums/TipoUsuario"
+import Escola from "@/model/Escola"
 import Usuario from "@/model/Usuario"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -88,8 +89,8 @@ export default function useCadastro() {
             await FBAutentication.cadastro(email, senha)
             const usuario: Usuario = {
                 id: "",
-                idAuth: FBAutentication.usuarioAuthLogado.uid,
-                tipoUsuario: TipoUsuario.ADMGERAL,
+                tipoUsuario: TipoUsuario.FUNCIONARIO,
+                escola: new Escola(),
                 nome: nome,
                 CEP: cep,
                 rua: rua,

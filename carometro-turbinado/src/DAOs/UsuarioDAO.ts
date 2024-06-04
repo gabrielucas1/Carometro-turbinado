@@ -3,6 +3,7 @@ import UsuarioFBDAO from "./FBAutentication";
 import { db } from "@/firebase/firebase";
 import Usuario from "@/model/Usuario";
 import TipoUsuario from "@/model/Enums/TipoUsuario";
+import escolaDAO from "./EscolaDAO";
 
 /*
     EXISTEM 2 USUÁRIOS, PORQUE NA AUTENTICAÇÃO DO FIREBASE, SÓ É
@@ -15,11 +16,12 @@ class UsuarioDAO {
         try {
             //UTILIZO O MESMO ID DA AUTENTICATION PARA LIGAR O DOCUMENTO USUÁRIO DO
             //FIRESTORE COM O USUARIO LOGADO NO AUTENTICATION
-            const idDoc = UsuarioFBDAO.usuarioAuthLogado.uid
+            const idDoc = UsuarioFBDAO.usuarioLogado.id
 
             await setDoc(doc(db, "usuario", idDoc), {
                 tipoUsuario: usuario.tipoUsuario,
                 nome: usuario.nome,
+                idEscola: usuario.escola.id,
                 CEP: usuario.CEP,
                 rua: usuario.rua,
                 bairro: usuario.bairro,
@@ -43,12 +45,20 @@ class UsuarioDAO {
             const docRef = doc(db, "usuario", id)
 
             const querySnapshot = await getDoc(docRef)
-
             if (querySnapshot.exists()) {
+                const data = querySnapshot.data()
+                
                 usuario.id = querySnapshot.id
-                usuario.nome = querySnapshot.data().nome
-                usuario.celular = querySnapshot.data().celular
-                usuario.tipoUsuario = querySnapshot.data().tipoUsuario
+                usuario.nome = data.nome
+                usuario.celular = data.celular
+                usuario.tipoUsuario = data.tipoUsuario
+
+                if (data.tipoUsuario != TipoUsuario.ADMGERAL) {
+                    if (data.idEscola != "") {
+                        usuario.escola = await escolaDAO.getOne(data.idEscola)
+                    }
+                }
+
             } else {
                 throw new Error("O documento não existe!")
             }
@@ -64,15 +74,20 @@ class UsuarioDAO {
         try {
             const querySnapshot = await getDocs(collection(db, "usuario"));
             const usuarios: Usuario[] = []
-            querySnapshot.forEach((doc) => {
+            querySnapshot.forEach(async (doc) => {
                 // doc.data() is never undefined for query doc snapshots
-                const usuarioData = doc.data(); // Obtém os dados do documento
+                const data = doc.data(); // Obtém os dados do documento
                 const usuario: Usuario = new Usuario()
 
                 usuario.id = doc.id
-                usuario.idAuth = usuarioData.idAuth
-                usuario.nome = usuarioData.nome
-                usuario.celular = usuarioData.celular
+                usuario.nome = data.nome
+                usuario.celular = data.celular
+
+                if (data.tipoUsuario != TipoUsuario.ADMGERAL) {
+                    if (data.idEscola != "") {
+                        usuario.escola = await escolaDAO.getOne(data.idEscola)
+                    }
+                }
 
                 usuarios.push(usuario);
             });
@@ -93,6 +108,19 @@ class UsuarioDAO {
             console.log("Tipo do Usuário atualizado com sucesso!")
         } catch (e) {
             throw new Error("Erro ao atualizar o Tipo do Usuário!")
+        }
+    }
+
+    //UPDATE
+    async updateIdEscola(idFuncionario: string, idEscola: string) {
+        try {
+            const docRef = doc(db, "usuario", idFuncionario)
+            await updateDoc(docRef, {
+                idEscola: idEscola
+            })
+            console.log("idEscola atualizado com sucesso!")
+        } catch (e) {
+            throw new Error("Erro ao atualizar o idEscola!")
         }
     }
 

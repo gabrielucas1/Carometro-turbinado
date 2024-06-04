@@ -1,4 +1,5 @@
 import { auth, provider, db } from "@/firebase/firebase";
+import Usuario from "@/model/Usuario";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
 
 /*
@@ -8,14 +9,14 @@ import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndP
     QUE EU COLOQUEI NO BANCO FIRESTORE, POR ISSO O OUTRO USUARIO
 */
 export default class FBAutentication {
-    static usuarioAuthLogado: User;
+    static usuarioLogado: Usuario = new Usuario();
 
     //RETORNO PROMISSE, PORQUE O FIREBASE USA THEN-CATCH AQUI POR PADRÃO
     static async login(email: string, password: string) {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password)
-            this.usuarioAuthLogado = userCredential.user
+            this.usuarioLogado.id = userCredential.user.uid
         } catch (erro) {
             throw new Error("Erro no Login!")
         }
@@ -38,7 +39,7 @@ export default class FBAutentication {
     static async cadastro(email: string, password: string) {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-            this.usuarioAuthLogado = userCredential.user
+            this.usuarioLogado.id = userCredential.user.uid
         } catch (erro) {
             throw new Error("Erro no Cadastro!")
         }
@@ -52,7 +53,7 @@ export default class FBAutentication {
                     const credential = GoogleAuthProvider.credentialFromResult(result);
                     const token = credential?.accessToken;
                     // The signed-in user info.
-                    this.usuarioAuthLogado = result.user;
+                    //this.usuarioAuthLogado = result.user;
                     // IdP data available using getAdditionalUserInfo(result)
                     // ...
                     resolve(true)
