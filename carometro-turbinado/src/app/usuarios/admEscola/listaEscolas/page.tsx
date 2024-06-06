@@ -31,7 +31,7 @@ export default function ListaEscola() {
 
             {/*RENDERIZA A LISTA DE ESCOLAS*/}
             {listEscolas.map((escola) => (
-                <div key={escola.id} onClick={idFuncionario != null ? () => { usuarioDAO.updateIdEscola(idFuncionario, escola.id); usuarioDAO.updateTipoUsuario(idFuncionario, TipoUsuario.ADMESCOLA);  router.push("./listaADMEscola")} : () => navegarPerfil(escola.id)} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
+                <div key={escola.id} onClick={idFuncionario != null ? () => { usuarioDAO.updateIdEscola(idFuncionario, escola.id); router.push("./listaFuncionarios") } : () => navegarPerfil(escola.id)} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
 
                     <p>{`Nome: ${escola.nome}`}</p>
 

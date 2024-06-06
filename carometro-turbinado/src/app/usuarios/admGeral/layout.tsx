@@ -1,8 +1,8 @@
 import Image from "next/image"
-import logo from '../../../public/images/Logo - CT.png'
+import logo from '../../../../public/images/Logo - CT.png'
 import Link from "next/link"
 
-export default function HeaderLayout({
+export default function ADMGeralLayout({
     children,
 }: {
     children: React.ReactNode
@@ -19,8 +19,8 @@ export default function HeaderLayout({
                         <button className="mt-6 w-full h-14 bg-red-500 flex items-center justify-center">Escolas</button>
                     </Link>
 
-                    <Link href={"/usuarios/admGeral/listaFuncionarios"}>
-                        <button className="mt-6 w-full h-14 bg-red-500 flex items-center">Funcionarios</button>
+                    <Link href={"/usuarios/admGeral/listaADMEscola"}>
+                        <button className="mt-6 w-full h-14 bg-red-500 flex items-center">ADMs Escola</button>
                     </Link>
                 </div>
                 <div className="ml-28 w-full">

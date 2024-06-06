@@ -1,6 +1,7 @@
 import { auth, provider, db } from "@/firebase/firebase";
 import Usuario from "@/model/Usuario";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
+import usuarioDAO from "./UsuarioDAO";
 
 /*
     UsuarioAuthDAO É A CLASSE RESPONSAVEL PELO FIREBASE AUTENTICATION,
@@ -17,6 +18,8 @@ export default class FBAutentication {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password)
             this.usuarioLogado.id = userCredential.user.uid
+            this.usuarioLogado = await usuarioDAO.getOne(this.usuarioLogado.id)
+            console.log(`Escola Logada: ${this.usuarioLogado.escola.id}`)
         } catch (erro) {
             throw new Error("Erro no Login!")
         }

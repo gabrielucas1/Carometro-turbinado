@@ -47,7 +47,7 @@ class UsuarioDAO {
             const querySnapshot = await getDoc(docRef)
             if (querySnapshot.exists()) {
                 const data = querySnapshot.data()
-                
+
                 usuario.id = querySnapshot.id
                 usuario.nome = data.nome
                 usuario.celular = data.celular
@@ -74,14 +74,15 @@ class UsuarioDAO {
         try {
             const querySnapshot = await getDocs(collection(db, "usuario"));
             const usuarios: Usuario[] = []
-            querySnapshot.forEach(async (doc) => {
-                // doc.data() is never undefined for query doc snapshots
+
+            for (const doc of querySnapshot.docs) {
                 const data = doc.data(); // Obtém os dados do documento
                 const usuario: Usuario = new Usuario()
 
                 usuario.id = doc.id
                 usuario.nome = data.nome
                 usuario.celular = data.celular
+                usuario.tipoUsuario = data.tipoUsuario
 
                 if (data.tipoUsuario != TipoUsuario.ADMGERAL) {
                     if (data.idEscola != "") {
@@ -90,13 +91,14 @@ class UsuarioDAO {
                 }
 
                 usuarios.push(usuario);
-            });
-
+            }
+            console.log("Usuarios retornados com sucesso!")
             return usuarios
         } catch (e) {
-            throw new Error("Erro ao pegar todas as escolas")
+            throw new Error("Erro ao pegar todos os usuarios")
         }
     }
+
 
     //UPDATE
     async updateTipoUsuario(id: string, tipoUsuario: TipoUsuario) {

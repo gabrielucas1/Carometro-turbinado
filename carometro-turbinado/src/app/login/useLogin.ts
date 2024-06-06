@@ -27,18 +27,19 @@ export default function useLogin() {
         await FBAutentication.login(email, senha)
 
         try {
-            const usuario = await usuarioDAO.getOne(FBAutentication.usuarioLogado.id)
-            if (usuario != null) {
-                switch (usuario.tipoUsuario) {
+            if (FBAutentication.usuarioLogado != null) {
+                switch (FBAutentication.usuarioLogado.tipoUsuario) {
                     case TipoUsuario.ADMGERAL: {
                         router.push("/usuarios/admGeral/listaEscolas")
                         break
                     }
                     case TipoUsuario.ADMESCOLA: {
-                        router.push("/usuarios/admEscola")
+                        router.push("/usuarios/admEscola/listaFuncionarios")
+                        break;
                     }
                     case TipoUsuario.FUNCIONARIO: {
-                        router.push("/usuarios/funcionario")
+                        router.push("/usuarios/admGeral/listaFuncionarios")
+                        break;
                     }
                 }
             } else {
