@@ -4,6 +4,7 @@ import { db } from "@/firebase/firebase";
 import Usuario from "@/model/Usuario";
 import TipoUsuario from "@/model/Enums/TipoUsuario";
 import escolaDAO from "./EscolaDAO";
+import firebase from "firebase/compat/app";
 
 /*
     EXISTEM 2 USUÁRIOS, PORQUE NA AUTENTICAÇÃO DO FIREBASE, SÓ É
@@ -16,9 +17,9 @@ class UsuarioDAO {
         try {
             //UTILIZO O MESMO ID DA AUTENTICATION PARA LIGAR O DOCUMENTO USUÁRIO DO
             //FIRESTORE COM O USUARIO LOGADO NO AUTENTICATION
-            const idDoc = UsuarioFBDAO.usuarioLogado.id
+            const idDoc = firebase.auth().currentUser?.uid
 
-            await setDoc(doc(db, "usuario", idDoc), {
+            await setDoc(doc(db, "usuario", idDoc!), {
                 tipoUsuario: usuario.tipoUsuario,
                 nome: usuario.nome,
                 idEscola: usuario.escola.id,
@@ -102,6 +103,7 @@ class UsuarioDAO {
 
     //UPDATE
     async updateTipoUsuario(id: string, tipoUsuario: TipoUsuario) {
+        console.log(`TipoUsuario: ${tipoUsuario}`)
         try {
             const docRef = doc(db, "usuario", id)
             await updateDoc(docRef, {

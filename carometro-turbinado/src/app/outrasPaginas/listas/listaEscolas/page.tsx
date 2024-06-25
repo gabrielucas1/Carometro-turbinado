@@ -14,7 +14,6 @@ export default function ListaEscola() {
     //PEGAR O ID DO FUNCIONARIO QUE VEIO DA TELA PERFIL FUNCIONARIO
     const searchParams = useSearchParams()
     const idFuncionario = searchParams.get("id")
-
     const [listEscolas, setListEscolas] = useState<Escola[]>([]);
 
     EscolaDAO.getAll().then((escolas) => {
@@ -22,7 +21,17 @@ export default function ListaEscola() {
     })
 
     function navegarPerfil(idEscola: string) {
-        router.push(`./perfilEscola?id=${idEscola}`)
+        router.push(`/outrasPaginas/perfil/perfilEscola?id=${idEscola}`)
+    }
+
+    async function virarADMEscola(escolaID: string) {
+        try {
+            await usuarioDAO.updateIdEscola(idFuncionario!, escolaID);
+            await usuarioDAO.updateTipoUsuario(idFuncionario!, TipoUsuario.ADMESCOLA)
+            router.push("/outrasPaginas/listas/listaADMEscola")
+        } catch (e: any) {
+            console.log(e.message)
+        }
     }
 
     return (
@@ -31,15 +40,16 @@ export default function ListaEscola() {
 
             {/*RENDERIZA A LISTA DE ESCOLAS*/}
             {listEscolas.map((escola) => (
-                <div key={escola.id} onClick={idFuncionario != null ? () => { usuarioDAO.updateIdEscola(idFuncionario, escola.id); usuarioDAO.updateTipoUsuario(idFuncionario, TipoUsuario.ADMESCOLA);  router.push("./listaADMEscola")} : () => navegarPerfil(escola.id)} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
+                <div key={escola.id} onClick={idFuncionario != null ? () => { virarADMEscola(escola.id) } : () => navegarPerfil(escola.id)} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
 
                     <p>{`Nome: ${escola.nome}`}</p>
 
                 </div>
             ))}
 
+            {/*NÃO TEM OPÇAO DE ADICIONAR QUANDO A TELA É APENAS PARA ESCOLHER UMA ESCOLA*/}
             {idFuncionario == null &&
-                <Link href={"./addEscola"}>
+                <Link href={"/outrasPaginas/adicionar/addEscola"}>
                     <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">Adicionar</button>
                 </Link>
             }

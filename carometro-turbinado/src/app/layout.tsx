@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { UserContextProvider } from "@/contexts/UserContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -18,8 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br">
-      <body className={`h-screen flex flex-col ${poppins.className}`}>{children}</body>
-    </html>
+    <UserContextProvider>
+      <html lang="pt-br">
+        <body className={`h-screen flex flex-col ${poppins.className}`}>
+          {children}
+        </body>
+      </html>
+    </UserContextProvider>
   );
 }

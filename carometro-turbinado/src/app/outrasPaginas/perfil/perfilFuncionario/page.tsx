@@ -33,7 +33,7 @@ export default function PerfilFuncionario() {
             <p>{usuario.nome}</p>
             <p>{usuario.celular}</p>
 
-            <button onClick={() => router.push(`./listaEscolas?id=${id}`)} className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Vincular</button>
+            <button onClick={() => router.push(`/outrasPaginas/listas/listaEscolas?id=${id}`)} className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Vincular</button>
         </div>
     )
 }

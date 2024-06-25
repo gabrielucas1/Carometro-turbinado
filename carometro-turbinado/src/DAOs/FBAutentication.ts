@@ -10,16 +10,11 @@ import usuarioDAO from "./UsuarioDAO";
     QUE EU COLOQUEI NO BANCO FIRESTORE, POR ISSO O OUTRO USUARIO
 */
 export default class FBAutentication {
-    static usuarioLogado: Usuario = new Usuario();
-
     //RETORNO PROMISSE, PORQUE O FIREBASE USA THEN-CATCH AQUI POR PADRÃO
     static async login(email: string, password: string) {
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password)
-            this.usuarioLogado.id = userCredential.user.uid
-            this.usuarioLogado = await usuarioDAO.getOne(this.usuarioLogado.id)
-            console.log(`Escola Logada: ${this.usuarioLogado.escola.id}`)
+           await signInWithEmailAndPassword(auth, email, password)
         } catch (erro) {
             throw new Error("Erro no Login!")
         }
@@ -41,8 +36,7 @@ export default class FBAutentication {
 
     static async cadastro(email: string, password: string) {
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-            this.usuarioLogado.id = userCredential.user.uid
+            await createUserWithEmailAndPassword(auth, email, password)
         } catch (erro) {
             throw new Error("Erro no Cadastro!")
         }
