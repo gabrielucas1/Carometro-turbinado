@@ -43,7 +43,7 @@ export default function OutrasPaginasLayout({
                     }
                     
                 </div>
-                <div className="ml-28 w-full">
+                <div className="ml-28 w-full flex flex-col items-center">
                     {children}
                 </div>
        

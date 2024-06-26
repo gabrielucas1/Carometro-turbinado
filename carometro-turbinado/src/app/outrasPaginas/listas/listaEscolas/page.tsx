@@ -6,7 +6,7 @@ import TipoUsuario from "@/model/Enums/TipoUsuario";
 import Escola from "@/model/Escola"
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ListaEscola() {
     const router = useRouter()
@@ -16,9 +16,11 @@ export default function ListaEscola() {
     const idFuncionario = searchParams.get("id")
     const [listEscolas, setListEscolas] = useState<Escola[]>([]);
 
-    EscolaDAO.getAll().then((escolas) => {
-        setListEscolas(escolas)
-    })
+    useEffect(() => {
+        EscolaDAO.getAll().then((escolas) => {
+            setListEscolas(escolas)
+        })
+    }, [])
 
     function navegarPerfil(idEscola: string) {
         router.push(`/outrasPaginas/perfil/perfilEscola?id=${idEscola}`)

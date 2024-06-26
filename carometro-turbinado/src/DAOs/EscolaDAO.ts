@@ -69,8 +69,8 @@ class EscolaDAO {
             escola.bairro = data.bairro
             escola.numeroCasa = data.numeroCasa
             escola.complemento = data.complemento
-            escola.telefone = escola.telefone
-            escola.estado = escola.estado
+            escola.telefone = data.telefone
+            escola.estado = data.estado
             escola.cidade = data.cidade
             escola.rede = data.rede
             escola.tipoEnsino = data.tipoEnsino
