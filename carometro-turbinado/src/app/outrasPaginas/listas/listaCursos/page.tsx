@@ -2,19 +2,25 @@
 
 import cursoDAO from "@/DAOs/CursoDAO"
 import Curso from "@/model/Curso"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export default function listaCursos() {
     const [listaCursos, setListaCursos] = useState<Curso[]>([])
+    const router = useRouter()
 
     useEffect(() => {
         cursoDAO.getAll().then((cursos) => {
             setListaCursos(cursos)
-            console.log(`CURSOS ${cursos[0].nome}`)
         }).catch((e) => {
             console.log(e.message)
         })
     }, [])
+
+    function navegarPerfil(idCurso: string) {
+        router.push(`/outrasPaginas/perfil/perfilCurso?id=${idCurso}`)
+    }
 
     return (
         <>
@@ -22,11 +28,14 @@ export default function listaCursos() {
 
             {
                 listaCursos.map((curso) => (
-                    <div key={curso.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
+                    <button onClick={() => navegarPerfil(curso.id)} key={curso.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
                         <p>{`Nome: ${curso.nome}`}</p>
-                    </div>
+                    </button>
                 ))
             }
+            <Link href={"/outrasPaginas/adicionar/addCurso"}>
+                <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">Adicionar</button>
+            </Link>
         </>
     )
 }

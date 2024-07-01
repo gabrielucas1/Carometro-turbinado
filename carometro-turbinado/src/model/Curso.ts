@@ -3,7 +3,7 @@ import Escola from "./Escola";
 
 export default class Curso{
     id: string
-    turno: Turno[]
+    turno: string[]
     nome: string
     escola: Escola
 

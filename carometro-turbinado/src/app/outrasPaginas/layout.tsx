@@ -39,6 +39,12 @@ export default function OutrasPaginasLayout({
                                     <button className="mt-6 w-full h-14 bg-red-500 flex items-center justify-center">Cursos</button>
                                 </Link>
                             }
+                            
+                            {usuarioLogado.tipoUsuario == TipoUsuario.ADMESCOLA &&
+                                <Link href={"/outrasPaginas/listas/listaTurmas"}>
+                                    <button className="mt-6 w-full h-14 bg-red-500 flex items-center justify-center">Turmas</button>
+                                </Link>
+                            }
                         </>
                     }
                     

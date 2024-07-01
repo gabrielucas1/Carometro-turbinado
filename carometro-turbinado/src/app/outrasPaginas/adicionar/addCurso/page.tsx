@@ -8,7 +8,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 
 interface ValorInput {
     nome: string
-    turno: Turno[]
+    turno: string[]
     idEscola: string
 }
 
@@ -32,19 +32,33 @@ export default function addCurso() {
     function getCheckBox(event: ChangeEvent<HTMLInputElement>) {
         const { value, checked } = event.target;
 
-        /*
-            REFAZER TURNO SELECIONADO, KEYOF NÃO FUNCIONOU
-        */
+        var turnoSelecionado: string = "";
 
-        const turnoSelecionado = Turno[value as keyof typeof Turno]; // Converte string para enum Turno
-        console.log(`TURNO; ${turnoSelecionado}`)
+        switch (value) {
+            case "Matutino": {
+                turnoSelecionado = Turno.MATUTINO
+                break;
+            }
+            case "Vespertino": {
+                turnoSelecionado = Turno.VESPERTINO
+                break
+            }
+            case "Noturno": {
+                turnoSelecionado = Turno.NOTURNO
+                break
+            }
+        }
+
+        
+        console.log(`TURNO: ${turnoSelecionado}`)
         // Verifica se o checkbox foi marcado ou desmarcado
-        if (checked) {
+        if (checked && !valorInput.turno.includes(turnoSelecionado)) {
             // Se foi marcado, adiciona o turno ao array
             setValorInput((prevState) => ({
                 ...prevState,
                 turno: [...prevState.turno, turnoSelecionado] // Adiciona o novo turno ao array
             }));
+            console.log(valorInput.turno)
         } else {
             // Se foi desmarcado, remove o turno do array
             setValorInput((prevState) => ({
