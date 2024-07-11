@@ -12,7 +12,7 @@ interface ValorInput {
     idEscola: string
 }
 
-export default function addCurso() {
+export default function AddCurso() {
     const [valorInput, setValorInput] = useState<ValorInput>({
         nome: '',
         turno: [],
