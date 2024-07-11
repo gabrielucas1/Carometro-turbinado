@@ -1,9 +1,6 @@
 "use client"
 
-import cursoDAO from "@/DAOs/CursoDAO"
 import turmaDAO from "@/DAOs/TurmaDAO"
-import Curso from "@/model/Curso"
-import Turno from "@/model/Enums/Turno"
 import Turma from "@/model/Turma"
 import { useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"

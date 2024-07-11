@@ -12,6 +12,7 @@ class TurmaDAO {
             const docRef = await addDoc(collection(db, "turma"), {
                 idCurso: turma.curso.id,
                 nome: turma.nome,
+                ano: turma.ano
             });
             console.log("Turma inserida com sucesso! ID: ", docRef.id);
         } catch (e) {
@@ -31,6 +32,7 @@ class TurmaDAO {
             turma.id = querySnapshot.id
             turma.nome = data.nome
             turma.curso = await cursoDAO.getOne(data.idCurso)
+            turma.ano = data.ano
         } else {
             throw new Error('Erro ao buscar turma!')
         }
@@ -49,6 +51,7 @@ class TurmaDAO {
 
             turma.id = doc.id
             turma.nome = data.nome
+            turma.ano = data.ano
             turma.curso = await cursoDAO.getOne(data.idCurso)
 
             turmas.push(turma);
@@ -63,6 +66,7 @@ class TurmaDAO {
             await setDoc(doc(db, "turma", turma.id), {
                 idCurso: turma.curso.id,
                 nome: turma.nome,
+                ano: turma.ano
             })
             console.log("Turma atualizada com sucesso!")
         } catch (e) {

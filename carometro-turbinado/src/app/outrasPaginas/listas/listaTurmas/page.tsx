@@ -33,6 +33,7 @@ export default function ListaTurmas() {
                 listaTurmas.map((turma) => (
                     <button onClick={() => navegarPerfil(turma.id)} key={turma.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
                         <p>{`Nome: ${turma.nome}`}</p>
+                        <p>{`Ano: ${turma.ano}`}</p>
                     </button>
                 ))
             }

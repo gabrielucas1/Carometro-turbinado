@@ -1,22 +1,22 @@
 "use client"
 
+import { UserContext } from "@/contexts/UserContext";
 import cursoDAO from "@/DAOs/CursoDAO";
 import escolaDAO from "@/DAOs/EscolaDAO";
 import Curso from "@/model/Curso";
 import Turno from "@/model/Enums/Turno";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useContext, useState } from "react";
 
 interface ValorInput {
     nome: string
     turno: string[]
-    idEscola: string
 }
 
 export default function AddCurso() {
+    const { usuarioLogado } = useContext(UserContext);
     const [valorInput, setValorInput] = useState<ValorInput>({
         nome: '',
         turno: [],
-        idEscola: ""
     })
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
@@ -49,7 +49,7 @@ export default function AddCurso() {
             }
         }
 
-        
+
         console.log(`TURNO: ${turnoSelecionado}`)
         // Verifica se o checkbox foi marcado ou desmarcado
         if (checked && !valorInput.turno.includes(turnoSelecionado)) {
@@ -73,7 +73,7 @@ export default function AddCurso() {
         const curso = new Curso()
         curso.nome = valorInput.nome
         curso.turno = valorInput.turno
-        curso.escola = await escolaDAO.getOne(valorInput.idEscola)
+        curso.escola = await escolaDAO.getOne(usuarioLogado.escola.id)
 
         try {
             console.log(`nome: ${curso.nome}`)
@@ -94,9 +94,6 @@ export default function AddCurso() {
             <form onSubmit={adicionarCurso}>
                 <label className="mt-10 self-start" htmlFor="nome">Nome</label>
                 <input onChange={getInput} className="border-2 w-full rounded h-10" id="nome" type="text" />
-
-                <label className="mt-10 self-start" htmlFor="nome">idEscola</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="idEscola" type="text" />
 
 
                 <div className="flex flex-row items-center">

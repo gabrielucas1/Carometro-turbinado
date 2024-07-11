@@ -9,7 +9,8 @@ import { ChangeEvent, FormEvent, useState } from "react";
 export default function addCurso() {
     const [valorInput, setValorInput] = useState({
         nome: '',
-        idCurso: ""
+        idCurso: "",
+        ano: ""
     })
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
@@ -27,6 +28,7 @@ export default function addCurso() {
         const turma = new Turma()
         turma.nome = valorInput.nome
         turma.curso = await cursoDAO.getOne(valorInput.idCurso)
+        turma.ano = valorInput.ano
 
         try {
             await turmaDAO.inserir(turma)
@@ -46,6 +48,8 @@ export default function addCurso() {
                 <label className="mt-10 self-start" htmlFor="nome">idCurso</label>
                 <input onChange={getInput} className="border-2 w-full rounded h-10" id="idCurso" type="text" />
 
+                <label className="mt-10 self-start" htmlFor="nome">Ano</label>
+                <input onChange={getInput} className="border-2 w-full rounded h-10" id="ano" type="text" />
 
                 <button type="submit" className="text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Adicionar</button>
             </form>
