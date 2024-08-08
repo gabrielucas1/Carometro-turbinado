@@ -12,7 +12,6 @@ export default class Aluno {
     estado: string
     cidade: string
     complemento: string
-    turma: Turma
 
     constructor() {
         this.id = ""
@@ -26,6 +25,5 @@ export default class Aluno {
         this.estado = ""
         this.cidade = ""
         this.complemento = ""
-        this.turma = new Turma
     }
 }

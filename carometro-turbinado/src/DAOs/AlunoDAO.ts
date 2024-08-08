@@ -1,7 +1,6 @@
 import { db } from "@/firebase/firebase";
 import Aluno from "@/model/Aluno";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
-import turmaDAO from "./TurmaDAO";
 
 class AlunoDAO {
     //INSERIR
@@ -18,7 +17,6 @@ class AlunoDAO {
                 estado: aluno.estado,
                 cidade: aluno.cidade,
                 complemento: aluno.complemento,
-                idTurma: aluno.turma.id
             });
             console.log("Aluno inserido com sucesso! ID: ", docRef.id);
             return docRef.id
@@ -47,7 +45,6 @@ class AlunoDAO {
             aluno.estado = data.estado
             aluno.cidade = data.cidade
             aluno.complemento = data.complemento
-            aluno.turma = await turmaDAO.getOne(data.idTurma)
         } else {
             throw new Error('Erro ao buscar aluno!')
         }
@@ -74,7 +71,6 @@ class AlunoDAO {
             aluno.estado = data.estado
             aluno.cidade = data.cidade
             aluno.complemento = data.complemento
-            aluno.turma = await turmaDAO.getOne(data.idTurma)
 
             alunos.push(aluno);
         }
@@ -96,7 +92,6 @@ class AlunoDAO {
                 estado: aluno.estado,
                 cidade: aluno.cidade,
                 complemento: aluno.complemento,
-                idTurma: aluno.turma.id
             })
             console.log("Aluno atualizado com sucesso!")
         } catch (e) {

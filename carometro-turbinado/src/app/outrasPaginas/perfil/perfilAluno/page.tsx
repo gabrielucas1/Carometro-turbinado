@@ -100,42 +100,49 @@ export default function PerfilAluno() {
 
     return (
         <>
-            <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-            <h1 className="mt-4 text-2xl">Perfil do Aluno</h1>
+            <section className="w-full flex flex-col justify-center items-center">
+                <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
+                <h1 className="mt-4 text-2xl">Perfil do Aluno</h1>
 
-            <form onSubmit={salvar} className="flex flex-col items-center h-full w-full px-96">
-                <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
-                <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.nome} />
+                <form onSubmit={salvar} className="flex flex-col items-center h-full w-full px-96">
+                    <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
+                    <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.nome} />
 
-                <label htmlFor="cep" className="mt-6 mb-1 self-start">CEP</label>
-                <input onChange={getInput} id="cep" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.cep} />
+                    <label htmlFor="cep" className="mt-6 mb-1 self-start">CEP</label>
+                    <input onChange={getInput} id="cep" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.cep} />
 
-                <label htmlFor="rua" className="mt-6 mb-1 self-start">Rua</label>
-                <input onChange={getInput} id="rua" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.rua} />
+                    <label htmlFor="rua" className="mt-6 mb-1 self-start">Rua</label>
+                    <input onChange={getInput} id="rua" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.rua} />
 
-                <label htmlFor="bairro" className="mt-6 mb-1 self-start">Bairro</label>
-                <input onChange={getInput} id="bairro" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.bairro} />
+                    <label htmlFor="bairro" className="mt-6 mb-1 self-start">Bairro</label>
+                    <input onChange={getInput} id="bairro" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.bairro} />
 
-                <label htmlFor="numeroEndereco" className="mt-6 mb-1 self-start">Número</label>
-                <input onChange={getInput} id="numeroEndereco" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.numeroEndereco} />
+                    <label htmlFor="numeroEndereco" className="mt-6 mb-1 self-start">Número</label>
+                    <input onChange={getInput} id="numeroEndereco" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.numeroEndereco} />
 
-                <label htmlFor="estado" className="mt-6 mb-1 self-start">Estado</label>
-                <input onChange={getInput} id="estado" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.estado} />
+                    <label htmlFor="estado" className="mt-6 mb-1 self-start">Estado</label>
+                    <input onChange={getInput} id="estado" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.estado} />
 
-                <label htmlFor="cidade" className="mt-6 mb-1 self-start">Cidade</label>
-                <input onChange={getInput} id="cidade" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.cidade} />
+                    <label htmlFor="cidade" className="mt-6 mb-1 self-start">Cidade</label>
+                    <input onChange={getInput} id="cidade" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.cidade} />
 
-                <label htmlFor="complemento" className="mt-6 mb-1 self-start">Complemento</label>
-                <input onChange={getInput} id="complemento" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.complemento} />
+                    <label htmlFor="complemento" className="mt-6 mb-1 self-start">Complemento</label>
+                    <input onChange={getInput} id="complemento" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.complemento} />
 
-                <label htmlFor="telefone" className="mt-6 mb-1 self-start">Telefone</label>
-                <input onChange={getInput} id="telefone" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.telefone} />
+                    <label htmlFor="telefone" className="mt-6 mb-1 self-start">Telefone</label>
+                    <input onChange={getInput} id="telefone" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={valorInput.telefone} />
 
-                <label htmlFor="dataNascimento" className="mt-6 mb-1 self-start">Data de Nascimento</label>
-                <input onChange={getInput} id="dataNascimento" className="border-gray-400 mb-6 p-1 border-2 rounded w-full h-9" value={valorInput.dataNascimento} />
+                    <label htmlFor="dataNascimento" className="mt-6 mb-1 self-start">Data de Nascimento</label>
+                    <input onChange={getInput} id="dataNascimento" className="border-gray-400 mb-6 p-1 border-2 rounded w-full h-9" value={valorInput.dataNascimento} />
 
-                <button type="submit" className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
-            </form>
+                    <button type="submit" className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
+                </form>
+
+            </section>
+
+            <section className="border-t-2 border-black w-full ">
+                <h2>Observações</h2>
+            </section>
         </>
     )
 }

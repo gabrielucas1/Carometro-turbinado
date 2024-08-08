@@ -3,6 +3,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "fir
 import alunoDAO from "./AlunoDAO";
 import turmaDAO from "./TurmaDAO";
 import TurmaAluno from "@/model/TurmaAluno";
+import Aluno from "@/model/Aluno";
 
 class TurmaAlunoDAO {
     // INSERIR
@@ -53,6 +54,22 @@ class TurmaAlunoDAO {
         }
 
         return turmaAlunos;
+    }
+
+    //PEGAR ALUNOS DA TURMA
+    async getAlunos(id: string): Promise<Aluno[]> {
+        const querySnapshot = await getDocs(collection(db, "turmaAluno"));
+        const alunos: Aluno[] = [];
+        for (const doc of querySnapshot.docs) {
+            const data = doc.data();
+
+            if (data.idTurma == id) {
+                const aluno: Aluno = await alunoDAO.getOne(data.idAluno);
+                alunos.push(aluno);
+            } 
+        }
+
+        return alunos;
     }
 
     // UPDATE

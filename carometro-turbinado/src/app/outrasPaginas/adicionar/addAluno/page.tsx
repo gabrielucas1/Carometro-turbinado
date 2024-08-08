@@ -6,6 +6,7 @@ import turmaAlunoDAO from "@/DAOs/TurmaAlunoDAO";
 import Aluno from "@/model/Aluno";
 import TurmaAluno from "@/model/TurmaAluno";
 import { ChangeEvent, FormEvent, useState } from "react";
+import Turma from "@/model/Turma";
 
 export default function AddAluno() {
     const [valorInput, setValorInput] = useState({
@@ -44,14 +45,15 @@ export default function AddAluno() {
         aluno.estado = valorInput.estado
         aluno.cidade = valorInput.cidade
         aluno.complemento = valorInput.complemento
-        aluno.turma = await turmaDAO.getOne(valorInput.idTurma)
+
+        const turma: Turma = await turmaDAO.getOne(valorInput.idTurma)
 
         try {
             const idAluno = await alunoDAO.inserir(aluno)
 
             const turmaAluno = new TurmaAluno()
             turmaAluno.aluno = await alunoDAO.getOne(idAluno)
-            turmaAluno.turma = aluno.turma
+            turmaAluno.turma = turma
 
             console.log(`ALUNO ID: ${turmaAluno.aluno.id}`)
             console.log(`TURMA ID: ${turmaAluno.turma.id}`)
