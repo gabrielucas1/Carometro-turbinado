@@ -66,7 +66,7 @@ class TurmaAlunoDAO {
             if (data.idTurma == id) {
                 const aluno: Aluno = await alunoDAO.getOne(data.idAluno);
                 alunos.push(aluno);
-            } 
+            }
         }
 
         return alunos;

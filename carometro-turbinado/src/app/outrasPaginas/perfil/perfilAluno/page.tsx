@@ -1,8 +1,11 @@
 "use client"
 
 import alunoDAO from "@/DAOs/AlunoDAO"
+import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
 import Aluno from "@/model/Aluno"
-import { useSearchParams } from "next/navigation"
+import RegistroVidaAluno from "@/model/RegistroVidaAluno"
+import jsPDF from "jspdf"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
 
 interface ValorInput {
@@ -19,6 +22,8 @@ interface ValorInput {
 }
 
 export default function PerfilAluno() {
+    const router = useRouter()
+    const [registros, setRegistros] = useState<RegistroVidaAluno[]>([])
     const [aluno, setAluno] = useState<Aluno>(new Aluno)
     const [valorInput, setValorInput] = useState<ValorInput>({
         nome: "",
@@ -53,6 +58,12 @@ export default function PerfilAluno() {
                     telefone: alunoBuscado.telefone,
                     dataNascimento: alunoBuscado.dataNascimento,
                 })
+            }).catch((e) => {
+                console.log(e.message)
+            })
+
+            registroVidaAlunoDAO.getAll().then((registros) => {
+                setRegistros(registros)
             }).catch((e) => {
                 console.log(e.message)
             })
@@ -98,11 +109,32 @@ export default function PerfilAluno() {
         }
     }
 
+    function adicionarRegistroVidaAluno() {
+        router.push(`/outrasPaginas/adicionar/addRegistroVidaAluno?id=${id}`)
+    }
+
+    function gerarRelatorio() {
+        const doc = new jsPDF()
+
+        doc.text("Relatório Aluno", 10, 10);
+        var yPos = 20;
+
+        Object.entries(aluno).forEach(([atributo, valor]) => {
+            doc.text(`${atributo}: ${valor}`, 10, yPos)
+            yPos += 10
+        })
+
+        doc.addImage(aluno.fotoUrl, 'JPEG', 10, yPos, 50, 50);
+
+        doc.save("relatorioAluno.pdf");
+    }
+
     return (
         <>
             <section className="w-full flex flex-col justify-center items-center">
-                <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
                 <h1 className="mt-4 text-2xl">Perfil do Aluno</h1>
+
+                <img src={aluno.fotoUrl} className="h-20" alt="Foto do Aluno" />
 
                 <form onSubmit={salvar} className="flex flex-col items-center h-full w-full px-96">
                     <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
@@ -135,14 +167,27 @@ export default function PerfilAluno() {
                     <label htmlFor="dataNascimento" className="mt-6 mb-1 self-start">Data de Nascimento</label>
                     <input onChange={getInput} id="dataNascimento" className="border-gray-400 mb-6 p-1 border-2 rounded w-full h-9" value={valorInput.dataNascimento} />
 
-                    <button type="submit" className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
+                    <div className="mt-4 mb-6 flex space-x-10">
+                        <button onClick={excluir} className="text-lg bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
+                        <button type="submit" className="text-lg bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
+                    </div>
                 </form>
 
             </section>
 
-            <section className="border-t-2 border-black w-full ">
-                <h2>Observações</h2>
+            <section className="border-t-2 border-black w-full flex flex-col justify-center items-center">
+                <h2 className="mt-6 text-xl">Observações</h2>
+
+                {registros.map((registro) => (
+                    <div key={registro.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
+                        <p>{`TipoRegistro: ${registro.tipoRegistro}`}</p>
+                        <p>{`Descrição: ${registro.descricao}`}</p>
+                    </div>
+                ))}
+
+                <button onClick={adicionarRegistroVidaAluno} className="mt-8 mb-8 text-lg bg-[#3579FF] py-2 px-6 text-white rounded-full hover:px-8 transition-all duration-200">Adicionar registro</button>
             </section>
+            <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-3 bg-[#3579FF] text-white rounded-full hover:px-5 transition-all duration-200">Gerar relatório</button>
         </>
     )
 }

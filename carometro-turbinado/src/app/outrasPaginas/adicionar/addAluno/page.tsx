@@ -1,12 +1,13 @@
 "use client"
 
+import { useState, ChangeEvent, FormEvent } from "react";
 import alunoDAO from "@/DAOs/AlunoDAO";
 import turmaDAO from "@/DAOs/TurmaDAO";
 import turmaAlunoDAO from "@/DAOs/TurmaAlunoDAO";
 import Aluno from "@/model/Aluno";
 import TurmaAluno from "@/model/TurmaAluno";
-import { ChangeEvent, FormEvent, useState } from "react";
-import Turma from "@/model/Turma";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/firebase/firebase"; // Certifique-se de que a referência ao Firebase Storage está correta
 
 export default function AddAluno() {
     const [valorInput, setValorInput] = useState({
@@ -20,47 +21,58 @@ export default function AddAluno() {
         estado: '',
         cidade: '',
         complemento: '',
-        idTurma: ''
-    })
+        idTurma: '',
+        foto: null as File | null // Adicione um estado para o arquivo de foto
+    });
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
-        const { id, value } = event.target;
+        const { id, value, type, files } = event.target;
 
         setValorInput((prevState) => ({
             ...prevState,
-            [id]: value,
+            [id]: type === 'file' ? files?.[0] ?? null : value,
         }));
     }
 
     async function adicionarAluno(e: FormEvent) {
-        e.preventDefault()
-        const aluno = new Aluno()
-        aluno.nome = valorInput.nome
-        aluno.dataNascimento = valorInput.dataNascimento
-        aluno.telefone = valorInput.telefone
-        aluno.cep = valorInput.cep
-        aluno.rua = valorInput.rua
-        aluno.bairro = valorInput.bairro
-        aluno.numeroEndereco = valorInput.numeroEndereco
-        aluno.estado = valorInput.estado
-        aluno.cidade = valorInput.cidade
-        aluno.complemento = valorInput.complemento
+        e.preventDefault();
+        const aluno = new Aluno();
+        aluno.nome = valorInput.nome;
+        aluno.dataNascimento = valorInput.dataNascimento;
+        aluno.telefone = valorInput.telefone;
+        aluno.cep = valorInput.cep;
+        aluno.rua = valorInput.rua;
+        aluno.bairro = valorInput.bairro;
+        aluno.numeroEndereco = valorInput.numeroEndereco;
+        aluno.estado = valorInput.estado;
+        aluno.cidade = valorInput.cidade;
+        aluno.complemento = valorInput.complemento;
 
-        const turma: Turma = await turmaDAO.getOne(valorInput.idTurma)
+        const turma = await turmaDAO.getOne(valorInput.idTurma);
 
         try {
-            const idAluno = await alunoDAO.inserir(aluno)
+            let fotoUrl = '';
+            if (valorInput.foto) {
+                // Upload da foto para o Firebase Storage
+                const storageRef = ref(storage, `alunos/${valorInput.foto.name}`);
+                await uploadBytes(storageRef, valorInput.foto);
+                fotoUrl = await getDownloadURL(storageRef);
+            }
 
-            const turmaAluno = new TurmaAluno()
-            turmaAluno.aluno = await alunoDAO.getOne(idAluno)
-            turmaAluno.turma = turma
+            aluno.fotoUrl = fotoUrl; // Adicione a URL da foto ao aluno
 
-            console.log(`ALUNO ID: ${turmaAluno.aluno.id}`)
-            console.log(`TURMA ID: ${turmaAluno.turma.id}`)
+            const idAluno = await alunoDAO.inserir(aluno);
 
-            await turmaAlunoDAO.inserir(turmaAluno)
+            const turmaAluno = new TurmaAluno();
+            turmaAluno.aluno = await alunoDAO.getOne(idAluno);
+            turmaAluno.turma = turma;
+
+            console.log(`ALUNO ID: ${turmaAluno.aluno.id}`);
+            console.log(`TURMA ID: ${turmaAluno.turma.id}`);
+
+            await turmaAlunoDAO.inserir(turmaAluno);
         } catch (e: any) {
-            console.log(e.message)
+            console.log(e.message);
         }
     }
 
@@ -102,8 +114,11 @@ export default function AddAluno() {
                 <label className="mt-4 self-start" htmlFor="idTurma">ID da Turma</label>
                 <input onChange={getInput} className="border-2 w-full rounded h-10" id="idTurma" type="text" />
 
+                <label className="mt-4 self-start" htmlFor="foto">Foto</label>
+                <input onChange={getInput} className="border-2 w-full rounded h-10" id="foto" type="file" />
+
                 <button type="submit" className="w-40 text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:w-44 transition-all duration-200">Adicionar</button>
             </form>
         </>
-    )
+    );
 }

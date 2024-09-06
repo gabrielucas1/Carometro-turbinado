@@ -4,7 +4,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "fir
 
 class AlunoDAO {
     //INSERIR
-    async inserir(aluno: Aluno) : Promise<string> {
+    async inserir(aluno: Aluno): Promise<string> {
         try {
             const docRef = await addDoc(collection(db, "aluno"), {
                 nome: aluno.nome,
@@ -17,36 +17,38 @@ class AlunoDAO {
                 estado: aluno.estado,
                 cidade: aluno.cidade,
                 complemento: aluno.complemento,
+                fotoUrl: aluno.fotoUrl, 
             });
             console.log("Aluno inserido com sucesso! ID: ", docRef.id);
-            return docRef.id
+            return docRef.id;
         } catch (e) {
-            throw new Error('Erro ao inserir aluno!')
+            throw new Error('Erro ao inserir aluno!');
         }
     }
 
     //GETONE
     async getOne(id: string): Promise<Aluno> {
-        const aluno = new Aluno()
+        const aluno = new Aluno();
 
-        const docRef = doc(db, "aluno", id)
-        const querySnapshot = await getDoc(docRef)
+        const docRef = doc(db, "aluno", id);
+        const querySnapshot = await getDoc(docRef);
         if (querySnapshot.exists()) {
-            const data = querySnapshot.data()
+            const data = querySnapshot.data();
 
-            aluno.id = querySnapshot.id
-            aluno.nome = data.nome
-            aluno.dataNascimento = data.dataNascimento
-            aluno.telefone = data.telefone
-            aluno.cep = data.cep
-            aluno.rua = data.rua
-            aluno.bairro = data.bairro
-            aluno.numeroEndereco = data.numeroEndereco
-            aluno.estado = data.estado
-            aluno.cidade = data.cidade
-            aluno.complemento = data.complemento
+            aluno.id = querySnapshot.id;
+            aluno.nome = data.nome;
+            aluno.dataNascimento = data.dataNascimento;
+            aluno.telefone = data.telefone;
+            aluno.cep = data.cep;
+            aluno.rua = data.rua;
+            aluno.bairro = data.bairro;
+            aluno.numeroEndereco = data.numeroEndereco;
+            aluno.estado = data.estado;
+            aluno.cidade = data.cidade;
+            aluno.complemento = data.complemento;
+            aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
         } else {
-            throw new Error('Erro ao buscar aluno!')
+            throw new Error('Erro ao buscar aluno!');
         }
 
         return aluno;
@@ -55,30 +57,32 @@ class AlunoDAO {
     //GETALL
     async getAll(): Promise<Aluno[]> {
         const querySnapshot = await getDocs(collection(db, "aluno"));
-        const alunos: Aluno[] = []
+        const alunos: Aluno[] = [];
         for (const doc of querySnapshot.docs) {
             const data = doc.data(); // Obtém os dados do documento
             const aluno: Aluno = new Aluno();
 
-            aluno.id = doc.id
-            aluno.nome = data.nome
-            aluno.dataNascimento = data.dataNascimento
-            aluno.telefone = data.telefone
-            aluno.cep = data.cep
-            aluno.rua = data.rua
-            aluno.bairro = data.bairro
-            aluno.numeroEndereco = data.numeroEndereco
-            aluno.estado = data.estado
-            aluno.cidade = data.cidade
-            aluno.complemento = data.complemento
+            aluno.id = doc.id;
+            aluno.nome = data.nome;
+            aluno.dataNascimento = data.dataNascimento;
+            aluno.telefone = data.telefone;
+            aluno.cep = data.cep;
+            aluno.rua = data.rua;
+            aluno.bairro = data.bairro;
+            aluno.numeroEndereco = data.numeroEndereco;
+            aluno.estado = data.estado;
+            aluno.cidade = data.cidade;
+            aluno.complemento = data.complemento;
+            aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
 
             alunos.push(aluno);
         }
 
-        return alunos
+        return alunos;
     }
 
     //UPDATE
+    // UPDATE
     async update(aluno: Aluno) {
         try {
             await setDoc(doc(db, "aluno", aluno.id), {
@@ -92,22 +96,23 @@ class AlunoDAO {
                 estado: aluno.estado,
                 cidade: aluno.cidade,
                 complemento: aluno.complemento,
-            })
-            console.log("Aluno atualizado com sucesso!")
+                fotoUrl: aluno.fotoUrl, // Adicionar fotoUrl
+            });
+            console.log("Aluno atualizado com sucesso!");
         } catch (e) {
-            throw new Error("Erro ao atualizar aluno!")
+            throw new Error("Erro ao atualizar aluno!");
         }
     }
 
     //DELETE
     async deletar(id: string) {
-        const docRef = doc(db, "aluno", id)
+        const docRef = doc(db, "aluno", id);
 
         try {
-            await deleteDoc(docRef)
-            console.log("Aluno excluído com sucesso!")
+            await deleteDoc(docRef);
+            console.log("Aluno excluído com sucesso!");
         } catch (e) {
-            throw new Error("Erro ao deletar aluno!")
+            throw new Error("Erro ao deletar aluno!");
         }
     }
 }
