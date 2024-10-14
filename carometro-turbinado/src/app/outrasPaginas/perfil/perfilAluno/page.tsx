@@ -2,8 +2,11 @@
 
 import alunoDAO from "@/DAOs/AlunoDAO"
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
+import { storage } from "@/firebase/firebase"
 import Aluno from "@/model/Aluno"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
+import { getDownloadURL, ref } from "firebase/storage"
+import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
@@ -113,21 +116,77 @@ export default function PerfilAluno() {
         router.push(`/outrasPaginas/adicionar/addRegistroVidaAluno?id=${id}`)
     }
 
-    function gerarRelatorio() {
-        const doc = new jsPDF()
+    async function gerarRelatorio() {
+        const doc = new jsPDF();
 
-        doc.text("Relatório Aluno", 10, 10);
-        var yPos = 20;
+        // Dimensões da página (em milímetros)
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-        Object.entries(aluno).forEach(([atributo, valor]) => {
-            doc.text(`${atributo}: ${valor}`, 10, yPos)
-            yPos += 10
-        })
+        doc.setLineWidth(1.1);
 
-        doc.addImage(aluno.fotoUrl, 'JPEG', 10, yPos, 50, 50);
+        // Desenhar um retângulo ao redor da página (x, y, largura, altura)
+        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);  // Ajustar as margens de acordo com a necessidade
 
-        doc.save("relatorioAluno.pdf");
+        const response = await fetch(aluno.fotoUrl);
+
+        //IMG.SRC SÓ ACEITA TIPO BLOB, POR ISSO A CONVERSÃO
+        const blob = await response.blob();
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
+
+        doc.addImage(img, 'JPEG', 10, 10, 40, 50);
+
+        const lineHeight = 10;
+        let yPosition = 14;
+        let xPosition = 70;
+
+        doc.text(`Nome: ${aluno.nome}`, xPosition, yPosition);
+        yPosition += lineHeight
+        doc.text(`Data de Nascimento: ${aluno.dataNascimento}`, xPosition, yPosition);
+        yPosition += lineHeight
+        doc.text(`Cidade: ${aluno.cidade}`, xPosition, yPosition);
+
+        // doc.text(`Telefone: ${aluno.telefone}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`CEP: ${aluno.cep}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`Rua: ${aluno.rua}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`Bairro: ${aluno.bairro}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`Número: ${aluno.numeroEndereco}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`Estado: ${aluno.estado}`, 10, yPosition);
+        // yPosition += lineHeight;
+        // doc.text(`Complemento: ${aluno.complemento}`, 10, yPosition);
+
+        xPosition = 10
+        yPosition = 80
+        doc.text('Registros de Vida do Aluno:', 10, yPosition);
+        yPosition += lineHeight * 2;
+
+        registros.forEach((registro, index) => {
+            const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(registro.data);
+
+            doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
+            yPosition += lineHeight * 1.5;
+            doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`======================================`, xPosition, yPosition);
+            yPosition += lineHeight * 2;
+        });
+
+        doc.save('relatorio-aluno-com-registros.pdf');
     }
+
+
 
     return (
         <>

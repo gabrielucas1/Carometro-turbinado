@@ -1,5 +1,5 @@
 import { db } from "@/firebase/firebase";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, Timestamp } from "firebase/firestore";
 import RegistroVidaAluno from "@/model/RegistroVidaAluno";
 import TipoRegistro from "@/model/Enums/TipoRegistro";
 
@@ -10,7 +10,9 @@ class RegistroVidaAlunoDAO {
             const docRef = await addDoc(collection(db, "registroVidaAluno"), {
                 tipoRegistro: registro.tipoRegistro,
                 descricao: registro.descricao,
-                idAluno: registro.idAluno, 
+                idAluno: registro.idAluno,
+                nomeProfessor: registro.nomeProfessor,
+                data: Timestamp.fromDate(registro.data),
             });
             console.log("Registro de vida de aluno inserido com sucesso! ID: ", docRef.id);
         } catch (e) {
@@ -31,6 +33,8 @@ class RegistroVidaAlunoDAO {
             registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
             registro.descricao = data.descricao;
             registro.idAluno = data.idAluno;
+            registro.nomeProfessor = data.nomeProfessor
+            registro.data = data.data.toDate()
         } else {
             throw new Error('Erro ao buscar registro de vida do aluno!');
         }
@@ -50,6 +54,8 @@ class RegistroVidaAlunoDAO {
             registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
             registro.descricao = data.descricao;
             registro.idAluno = data.idAluno;
+            registro.nomeProfessor = data.nomeProfessor
+            registro.data = data.data.toDate()
 
             registros.push(registro);
         }
@@ -63,7 +69,9 @@ class RegistroVidaAlunoDAO {
             await setDoc(doc(db, "registroVidaAluno", id), {
                 tipoRegistro: registro.tipoRegistro,
                 descricao: registro.descricao,
-                idAluno: registro.idAluno, 
+                idAluno: registro.idAluno,
+                nomeProfessor: registro.nomeProfessor,
+                data: Timestamp.fromDate(registro.data),
             });
             console.log("Registro de vida de aluno atualizado com sucesso!");
         } catch (e) {
@@ -74,7 +82,6 @@ class RegistroVidaAlunoDAO {
     // DELETE
     async deletar(id: string) {
         const docRef = doc(db, "registroVidaAluno", id);
-
         try {
             await deleteDoc(docRef);
             console.log("Registro de vida de aluno excluído com sucesso!");

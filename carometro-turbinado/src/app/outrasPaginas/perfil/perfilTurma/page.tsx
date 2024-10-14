@@ -14,10 +14,13 @@ import { UserContext } from "@/contexts/UserContext"
 import RegistroProfessorAluno from "@/model/RegistroProfessorAluno"
 import registroProfessorAlunoDAO from "@/DAOs/RegistroProfessorAlunoDAO"
 import jsPDF from "jspdf"
+import RegistroVidaAluno from "@/model/RegistroVidaAluno"
+import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
 
 export default function PerfilTurma() {
     const [turma, setTurma] = useState<Turma>(new Turma)
     const [alunos, setAlunos] = useState<Aluno[]>([])
+    const [registros, setRegistros] = useState<RegistroVidaAluno[]>([])
     const [disciplina, setDisciplina] = useState("")
     const [periodo, setPeriodo] = useState("")
     const [revisaoGeral, setRevisaoGeral] = useState("")
@@ -32,20 +35,34 @@ export default function PerfilTurma() {
 
     useEffect(() => {
         if (id) {
+            // Buscar a turma
             turmaDAO.getOne(id).then((turmaBuscada) => {
-                setTurma(turmaBuscada)
-                setNome(turmaBuscada.nome)
+                setTurma(turmaBuscada);
+                setNome(turmaBuscada.nome);
             }).catch((e) => {
-                console.log(e.message)
-            })
+                console.log(e.message);
+            });
 
-            turmaAlunoDAO.getAlunos(id).then((alunos) => {
-                setAlunos(alunos)
+            // Buscar os alunos da turma
+            turmaAlunoDAO.getAlunos(id).then(async (alunos) => {
+                setAlunos(alunos);
+
+                // Para cada aluno, buscar o registro de vida (relatório)
+                const registrosTemp: RegistroVidaAluno[] = []; // Array temporário para armazenar registros
+                for (const aluno of alunos) {
+                    try {
+                        const registro = await registroVidaAlunoDAO.getOne(aluno.id); // Chame o método passando o ID do aluno
+                        registrosTemp.push(registro); // Adiciona o registro ao array temporário
+                    } catch (e: any) {
+                        console.log(`Erro ao buscar registro para o aluno ${aluno.id}: ${e.message}`);
+                    }
+                }
+                setRegistros(registrosTemp); // Atualiza o estado com os registros
             }).catch((e) => {
-                console.log(e.message)
-            })
+                console.log(e.message);
+            });
         }
-    }, [])
+    }, [id]);
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
         setNome(event.target.value)
@@ -126,20 +143,74 @@ export default function PerfilTurma() {
     }
 
     async function gerarRelatorio() {
-        const doc = new jsPDF()
+        const doc = new jsPDF();
 
-        doc.text("Relatório Aluno", 10, 10);
-        var yPos = 20;
+        // Adicionar título
+        doc.text('Relatório de Alunos', 10, 10);
+        let yPosition = 20; // Posição inicial após o título
+        const lineHeight = 10;
 
-        const registros = await registroProfessorAlunoDAO.getAll()
+        for (const aluno of alunos) {
+            // Adicionar atributos do aluno ao PDF
+            // Se a posição Y for muito baixa, adicionar nova página
+            if (yPosition > 270) {
+                doc.addPage();
+                yPosition = 10; // Reiniciar a posição Y
+            }
 
-        Object.entries(registros).forEach(([atributo, valor]) => {
-            doc.text(`${atributo}: ${valor}`, 10, yPos)
-            yPos += 10
-        })
+            doc.text(`Nome: ${aluno.nome}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Data de Nascimento: ${aluno.dataNascimento}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Telefone: ${aluno.telefone}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`CEP: ${aluno.cep}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Rua: ${aluno.rua}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Bairro: ${aluno.bairro}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Número: ${aluno.numeroEndereco}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Estado: ${aluno.estado}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Cidade: ${aluno.cidade}`, 10, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Complemento: ${aluno.complemento}`, 10, yPosition);
 
-        doc.save("relatorioAluno.pdf");
+            // Adicionar um título para a seção de registros
+            yPosition += lineHeight * 2;
+            doc.text('Registros de Vida do Aluno:', 10, yPosition);
+            yPosition += lineHeight * 2;
+
+
+            // Iterar sobre os registros e adicioná-los ao PDF
+            registros.forEach((registro, index) => {
+                // Se a posição Y for muito baixa, adicionar nova página
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 10; // Reiniciar a posição Y
+                }
+
+                doc.text(`Registro ${index + 1}`, 10, yPosition);
+                yPosition += lineHeight * 1.5;
+                doc.text(`Tipo: ${registro.tipoRegistro}`, 10, yPosition);
+                yPosition += lineHeight;
+                doc.text(`Descrição: ${registro.descricao}`, 10, yPosition);
+                yPosition += lineHeight;
+            });
+
+            // Adicionar um espaço entre os alunos
+            yPosition += lineHeight * 3;
+        }
+
+        // Salvar o PDF
+        doc.save('relatorio-alunos-com-registros.pdf');
     }
+
+
+
+
 
     return (
         <>

@@ -2,11 +2,14 @@
 
 import RegistroVidaAluno from "@/model/RegistroVidaAluno";
 import TipoRegistro from "@/model/Enums/TipoRegistro"; // Importe o enum TipoRegistro
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO";
 import { useSearchParams } from "next/navigation";
+import { UserContext } from "@/contexts/UserContext";
 
 export default function AddRegistroVidaAluno() {
+    const { usuarioLogado } = useContext(UserContext)
+
     // PEGANDO ID DO ALUNO QUE VEIO DA TELA LISTA ALUNOS
     const searchParams = useSearchParams()
     const idAluno = searchParams.get('id')
@@ -48,6 +51,7 @@ export default function AddRegistroVidaAluno() {
 
         registroVidaAluno.descricao = valorInput.descricao;
         registroVidaAluno.idAluno = idAluno!;
+        registroVidaAluno.nomeProfessor = usuarioLogado.nome
         await registroVidaAlunoDAO.inserir(registroVidaAluno)
     }
 

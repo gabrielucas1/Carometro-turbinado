@@ -11,7 +11,8 @@
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
     "firebase": "^10.6.0",
-    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "next": "^14.1.4",
     "react": "^18",
     "react-dom": "^18",
