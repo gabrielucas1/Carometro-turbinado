@@ -138,8 +138,8 @@ export default function PerfilAluno() {
         doc.addImage(img, 'JPEG', 10, 10, 40, 50);
 
         const lineHeight = 10;
-        let yPosition = 14;
-        let xPosition = 70;
+        let yPosition = 20;
+        let xPosition = 56;
 
         doc.text(`Nome: ${aluno.nome}`, xPosition, yPosition);
         yPosition += lineHeight
@@ -162,9 +162,9 @@ export default function PerfilAluno() {
         // doc.text(`Complemento: ${aluno.complemento}`, 10, yPosition);
 
         xPosition = 10
-        yPosition = 80
-        doc.text('Registros de Vida do Aluno:', 10, yPosition);
-        yPosition += lineHeight * 2;
+        yPosition = 76
+        doc.text('Registros da Vida do Aluno:', 10, yPosition);
+        yPosition += lineHeight + 6;
 
         registros.forEach((registro, index) => {
             const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
@@ -180,7 +180,7 @@ export default function PerfilAluno() {
             doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
             yPosition += lineHeight;
             doc.text(`======================================`, xPosition, yPosition);
-            yPosition += lineHeight * 2;
+            yPosition += lineHeight + 6;
         });
 
         doc.save('relatorio-aluno-com-registros.pdf');
