@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebase";
 import Curso from "@/model/Curso";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import escolaDAO from "./EscolaDAO";
 import Turma from "@/model/Turma";
 import cursoDAO from "./CursoDAO";
@@ -38,6 +38,27 @@ class TurmaDAO {
         }
 
         return turma;
+    }
+
+    async getByCursoId(idCurso: string): Promise<Turma[]> {
+        const turmasRef = collection(db, "turma");
+        const q = query(turmasRef, where("idCurso", "==", idCurso));
+        const querySnapshot = await getDocs(q);
+    
+        const turmas: Turma[] = [];
+        for (const doc of querySnapshot.docs) {
+            const data = doc.data();
+            const turma: Turma = new Turma();
+    
+            turma.id = doc.id;
+            turma.nome = data.nome;
+            turma.ano = data.ano;
+            turma.curso = await cursoDAO.getOne(data.idCurso);
+    
+            turmas.push(turma);
+        }
+    
+        return turmas;
     }
 
     //GETALL

@@ -1,5 +1,5 @@
 import { db } from "@/firebase/firebase";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, Timestamp } from "firebase/firestore";
 import RegistroProfessorTurma from "@/model/RegistroProfessorTurma";
 
 class RegistroProfessorTurmaDAO {
@@ -12,6 +12,7 @@ class RegistroProfessorTurmaDAO {
                 periodo: registro.periodo,
                 idTurma: registro.turma.id,  // Armazenando apenas o ID da turma
                 revisaoGeral: registro.revisaoGeral,
+                data: Timestamp.fromDate(registro.data)
             });
             console.log("Registro do professor na turma inserido com sucesso! ID: ", docRef.id);
             return docRef.id; // Retornando o ID do documento recém-criado
@@ -36,6 +37,7 @@ class RegistroProfessorTurmaDAO {
             registro.periodo = data.periodo;
             registro.turma.id = data.idTurma;  // Atribuindo o ID da turma
             registro.revisaoGeral = data.revisaoGeral;
+            registro.data = data.data.toDate();
         } else {
             throw new Error('Erro ao buscar registro do professor na turma!');
         }
@@ -57,6 +59,7 @@ class RegistroProfessorTurmaDAO {
             registro.periodo = data.periodo;
             registro.turma.id = data.idTurma;  // Atribuindo o ID da turma
             registro.revisaoGeral = data.revisaoGeral;
+            registro.data = data.data.toDate();
 
             registros.push(registro);
         }
@@ -73,6 +76,7 @@ class RegistroProfessorTurmaDAO {
                 periodo: registro.periodo,
                 idTurma: registro.turma.id,
                 revisaoGeral: registro.revisaoGeral,
+                data: Timestamp.fromDate(registro.data)
             });
             console.log("Registro do professor na turma atualizado com sucesso!");
         } catch (e) {

@@ -9,9 +9,9 @@ export default function LogarGoogle() {
     FBAutentication.loginGoogle().then((logado) => {
       if (logado) {
         if (UsuarioDAO.getOne(FBAutentication.usuarioAuthLogado.uid) == null) {
-          router.push("/outrasPaginas/tipoUsuario")
+          router.push("/tipoUsuario")
         } else {
-          router.push("/outrasPaginas/menuPrincipal")
+          router.push("/menuPrincipal")
         }
       }
     })

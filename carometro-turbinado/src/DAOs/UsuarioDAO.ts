@@ -53,6 +53,7 @@ class UsuarioDAO {
                 usuario.nome = data.nome
                 usuario.celular = data.celular
                 usuario.tipoUsuario = data.tipoUsuario
+                usuario.dataNascimento = data.dataNascimento
 
                 if (data.tipoUsuario != TipoUsuario.ADMGERAL) {
                     if (data.idEscola != "") {
@@ -84,6 +85,7 @@ class UsuarioDAO {
                 usuario.nome = data.nome
                 usuario.celular = data.celular
                 usuario.tipoUsuario = data.tipoUsuario
+                usuario.dataNascimento = data.dataNascimento
 
                 if (data.tipoUsuario != TipoUsuario.ADMGERAL) {
                     if (data.idEscola != "") {

@@ -8,6 +8,7 @@ export default class RegistroProfessorTurma{
     periodo: string
     turma: Turma
     revisaoGeral: String
+    data: Date
 
     constructor() {
         this.id = ""
@@ -16,5 +17,6 @@ export default class RegistroProfessorTurma{
         this.periodo = ""
         this.turma = new Turma
         this.revisaoGeral = ""
+        this.data = new Date()
     }
 }

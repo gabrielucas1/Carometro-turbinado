@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Roboto } from "next/font/google";
 import "./globals.css";
 import { UserContextProvider } from "@/contexts/UserContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["500", "700"], // Especifique o(s) peso(s) desejado(s) aqui
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "700"], // Especifique os pesos que você usará
 });
 
 export const metadata: Metadata = {

@@ -39,6 +39,8 @@ function UserContextProvider({
             } else {
                 atualizarUsuarioLogado(new Usuario()); // Ou um usuário vazio, se preferir
             }
+        
+            setCarregando(false);
         });
 
         return () => unsubscribe(); // Limpar o ouvinte ao desmontar o componente

@@ -18,20 +18,6 @@ export default class FBAutentication {
         } catch (erro) {
             throw new Error("Erro no Login!")
         }
-
-        /*
-        return new Promise((resolve) => {
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    //USUÁRIO LOGADO
-                    this.usuarioAuthLogado = userCredential.user;
-                    resolve(true)
-                })
-                .catch((error) => {
-                    console.log("Login falhou!" + error)
-                });
-        })
-        */
     }
 
     static async cadastro(email: string, password: string) {

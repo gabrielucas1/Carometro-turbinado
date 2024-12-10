@@ -10,11 +10,13 @@ import Usuario from '@/model/Usuario';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {CircularProgress} from "@nextui-org/progress";
 import React, { FormEvent, useContext, useState, useEffect } from 'react';
 
 export default function Login() {
     const router = useRouter();
     const { usuarioLogado, atualizarUsuarioLogado } = useContext(UserContext);
+    const [logando, setLogando] = useState(false);
     
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
@@ -24,40 +26,33 @@ export default function Login() {
 
     const submitLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLogando(true);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-           const usuario = await usuarioDAO.getOne(userCredential.user.uid);
-
-            //LINHA A SER REMOVIDA APÓS CORREÇÃO
-            //const usuario = await usuarioDAO.getOne("OWJbqUWnbLax2h9OQcrLxt4K3cD2")
-
+            const usuario = await usuarioDAO.getOne(userCredential.user.uid);
 
             atualizarUsuarioLogado(usuario);
 
             if (usuario) {
                 switch (usuario.tipoUsuario) {
                     case TipoUsuario.ADMGERAL:
-                        router.push("/outrasPaginas/listas/listaEscolas");
+                        router.push("listas/listaEscolas");
                         break;
                     case TipoUsuario.ADMESCOLA:
                     case TipoUsuario.FUNCIONARIO:
-                        router.push("/outrasPaginas/listas/listaFuncionarios");
+                        router.push("listas/listaFuncionarios");
                         break;
                 }
             } else {
-                console.log("Usuário não encontrado!");
+                alert("Usuário não encontrado!");
             }
         } catch (e) {
-            console.log(`Erro no login! ${e}`);
+            alert(`Erro no login! ${e}`);
         }
     };
 
-    useEffect(() => {
-        console.log('Estado do usuário logado:', usuarioLogado);
-    }, []);
-
     return (
-        <main className="flex flex-col w-screen h-screen justify-center items-center">
+        <main className="flex flex-col w-screen h-screen justify-center items-center bg-[#5992FF]">
             <form onSubmit={submitLogin} className="text-lg bg-white w-[400px] p-9 py-14 rounded-3xl flex flex-col justify-center items-center">
                 <h1 className="text-3xl mb-20 font-semibold">LOGIN</h1>
                 <input 
@@ -80,7 +75,11 @@ export default function Login() {
                 <button 
                     type="submit" 
                     className="text-lg mt-10 bg-[#3579FF] py-2 px-12 text-white rounded-full hover:px-14 transition-all duration-200">
-                    Logar
+                    {logando 
+                        ? <CircularProgress size='sm' color='secondary' strokeWidth={4}/>
+                        : "Logar"
+
+                    }
                 </button>
                 <LogarGoogle />
                 <p className="mt-8 text-base">Não possui conta? <Link className="font-semibold" href="/cadastro">Clique aqui</Link></p>

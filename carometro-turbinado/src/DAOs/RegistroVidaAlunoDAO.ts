@@ -20,44 +20,26 @@ class RegistroVidaAlunoDAO {
         }
     }
 
-    // GETONE
-    async getOne(id: string): Promise<RegistroVidaAluno> {
-        const registro = new RegistroVidaAluno();
-
-        const docRef = doc(db, "registroVidaAluno", id);
-        const querySnapshot = await getDoc(docRef);
-        if (querySnapshot.exists()) {
-            const data = querySnapshot.data();
-
-            registro.id = querySnapshot.id
-            registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
-            registro.descricao = data.descricao;
-            registro.idAluno = data.idAluno;
-            registro.nomeProfessor = data.nomeProfessor
-            registro.data = data.data.toDate()
-        } else {
-            throw new Error('Erro ao buscar registro de vida do aluno!');
-        }
-
-        return registro;
-    }
+    //GETONE NÃO EXISTE, POIS NÃO HÁ NECESSIDADE
 
     // GETALL
-    async getAll(): Promise<RegistroVidaAluno[]> {
+    async getAll(idAluno: String): Promise<RegistroVidaAluno[]> {
         const querySnapshot = await getDocs(collection(db, "registroVidaAluno"));
         const registros: RegistroVidaAluno[] = [];
         for (const doc of querySnapshot.docs) {
-            const data = doc.data();
-            const registro = new RegistroVidaAluno();
+            if (doc.data().idAluno != idAluno) {
+                const data = doc.data();
+                const registro = new RegistroVidaAluno();
 
-            registro.id = doc.id
-            registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
-            registro.descricao = data.descricao;
-            registro.idAluno = data.idAluno;
-            registro.nomeProfessor = data.nomeProfessor
-            registro.data = data.data.toDate()
+                registro.id = doc.id
+                registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
+                registro.descricao = data.descricao;
+                registro.idAluno = data.idAluno;
+                registro.nomeProfessor = data.nomeProfessor
+                registro.data = data.data.toDate()
 
-            registros.push(registro);
+                registros.push(registro);
+            }
         }
 
         return registros;
