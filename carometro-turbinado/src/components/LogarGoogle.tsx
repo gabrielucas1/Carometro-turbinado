@@ -6,15 +6,15 @@ export default function LogarGoogle() {
   const router = useRouter()
 
   function logarGoogle() {
-    FBAutentication.loginGoogle().then((logado) => {
-      if (logado) {
-        if (UsuarioDAO.getOne(FBAutentication.usuarioAuthLogado.uid) == null) {
-          router.push("/tipoUsuario")
-        } else {
-          router.push("/menuPrincipal")
-        }
-      }
-    })
+    // FBAutentication.loginGoogle().then((logado) => {
+    //   if (logado) {
+    //     if (UsuarioDAO.getOne(FBAutentication.usuarioAuthLogado.uid) == null) {
+    //       router.push("/tipoUsuario")
+    //     } else {
+    //       router.push("/menuPrincipal")
+    //     }
+    //   }
+    // })
   }
 
   return (

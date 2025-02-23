@@ -6,12 +6,14 @@ import Turma from "@/model/Turma";
 import { ChangeEvent, FormEvent, useState } from "react";
 
 
-export default function addCurso() {
+export default function AddCurso() {
     const [valorInput, setValorInput] = useState({
         nome: '',
         idCurso: "",
         ano: ""
     })
+
+    
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
         const { id, value } = event.target;

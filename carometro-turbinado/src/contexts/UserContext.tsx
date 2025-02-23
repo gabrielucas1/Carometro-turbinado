@@ -37,14 +37,14 @@ function UserContextProvider({
                 setCarregando(false)
                 atualizarUsuarioLogado(usuarioLogadoAtualizado);
             } else {
-                atualizarUsuarioLogado(new Usuario()); // Ou um usuário vazio, se preferir
+                atualizarUsuarioLogado(new Usuario());
             }
         
             setCarregando(false);
         });
 
         return () => unsubscribe(); // Limpar o ouvinte ao desmontar o componente
-    }, [atualizarUsuarioLogado]);
+    }, []);
 
     return (
         <UserContext.Provider value={{ usuarioLogado, atualizarUsuarioLogado, carregando }}>

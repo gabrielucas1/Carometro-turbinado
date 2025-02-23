@@ -10,7 +10,7 @@ export default function Cadastro() {
 
     const cadastro = useCadastro()
     return (
-        <main className="flex flex-col w-screen h-screen justify-center items-center">
+        <main className="flex flex-col w-screen h-screen justify-center items-center bg-[#5992FF]">
             <form onSubmit={cadastro.submitCadastro} className="text-lg bg-white w-[420px] p-8 px-10 rounded-3xl flex flex-col justify-center items-center">
                 <h1 className="text-3xl mb-5 font-bold">Cadastre-se</h1>
 

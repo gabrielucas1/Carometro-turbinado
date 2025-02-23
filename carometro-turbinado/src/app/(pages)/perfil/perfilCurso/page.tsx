@@ -37,7 +37,7 @@ export default function PerfilCurso() {
             })
         }
 
-    }, [])
+    }, [id])
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
         const { id, value } = event.target;

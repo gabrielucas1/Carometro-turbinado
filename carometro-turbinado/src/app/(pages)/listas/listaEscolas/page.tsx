@@ -22,9 +22,9 @@ export default function ListaEscola() {
     useEffect(() => {
         EscolaDAO.getAll().then((escolas) => {
             setListEscolas(escolas)
+        }).catch((e) => {
+            console.error(e.message)
         })
-
-        console.log(`aaaaa ${usuarioLogado.nome}`)
     }, [])
 
     function navegarPerfil(idEscola: string) {
@@ -38,7 +38,7 @@ export default function ListaEscola() {
             {/*RENDERIZA A LISTA DE ESCOLAS*/}
             <div className="flex flex-col gap-4 py-6">
                 {listEscolas.map((escola) => (
-                   <EscolaCard escola={escola} idFuncionario={idFuncionario} />
+                   <EscolaCard key={escola.id} escola={escola} idFuncionario={idFuncionario} />
                 ))}
             </div>
 

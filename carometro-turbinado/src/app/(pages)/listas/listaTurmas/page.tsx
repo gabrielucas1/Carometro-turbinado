@@ -25,7 +25,7 @@ export default function ListaTurmas() {
         }).catch((e) => {
             console.log(e.message)
         })
-    }, [])
+    }, [id])
 
     function navegarPerfil(idTurma: string) {
         router.push(`/perfil/perfilTurma?id=${idTurma}`)
