@@ -12,7 +12,7 @@ export default function AlunoCard({ aluno }: { aluno: Aluno }) {
     return(
         <button className="shadow-sm border-gray-900 border-1 bg-gray-50 rounded-lg w-96 h-32 p-3 flex hover:w-[25rem] transition-all cursor-pointer" onClick={() => navegarPerfilAluno(aluno.id)} key={aluno.id}>
                 <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg">
-                    <Image src={aluno.fotoUrl} width={100} alt={`Foto do aluno ${aluno.nome}`}/>
+                    <img src={aluno.fotoUrl} width={100} alt={`Foto do aluno ${aluno.nome}`}></img>
                 </div>
                 <div className="px-3 flex flex-col gap-3 text-start h-full py-1">
                     <p className="text-xl">{aluno.nome}</p>
