@@ -1,7 +1,4 @@
-# Carometro-Turbinado
-Software para gestão de alunos
-
-# 📌 Projeto
+# 📌 Caromêtro Turbinado - Software para gestão de alunos
 
 Este projeto utiliza Node.js, Next.js e Firebase. Siga os passos abaixo para configurá-lo corretamente.
 
