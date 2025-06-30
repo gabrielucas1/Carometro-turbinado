@@ -5,7 +5,7 @@ export default class Curso{
     id: string
     turno: string[]
     nome: string
-    escola:  { id: string } = { id: "" };
+    escola:  Escola;
 
     constructor() {
         this.id = ""
