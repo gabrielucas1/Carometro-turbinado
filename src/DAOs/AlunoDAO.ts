@@ -19,6 +19,7 @@ class AlunoDAO {
                 complemento: aluno.complemento,
                 fotoUrl: aluno.fotoUrl, 
                 idTurma: aluno.idTurma,
+                idEscola: aluno.idEscola // Salva corretamente o idEscola
             });
             console.log("Aluno inserido com sucesso! ID: ", docRef.id);
             return docRef.id;
@@ -124,6 +125,7 @@ class AlunoDAO {
             aluno.cidade = data.cidade;
             aluno.complemento = data.complemento;
             aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
+            aluno.idEscola = data.idEscola;
 
             alunos.push(aluno);
         }
@@ -147,6 +149,7 @@ class AlunoDAO {
                 complemento: aluno.complemento,
                 fotoUrl: aluno.fotoUrl, // Adicionar fotoUrl
                 idTurma: aluno.idTurma,
+                idEscola: aluno.idEscola // Salva corretamente o idEscola
             });
             console.log("Aluno atualizado com sucesso!");
         } catch (e) {

@@ -14,11 +14,60 @@ import { getAuth } from "firebase/auth";
     O INTUITO DE ARMAZENAR ESSES ATRIBUTOS EXTRAS
 */
 class UsuarioDAO {
+    /**
+     * Retorna um objeto pronto para salvar no localStorage, incluindo idEscola direto no objeto.
+     * Use após login/cadastro para garantir que o filtro funcione corretamente.
+     */
+    async getUsuarioComIdEscola(id: string) {
+        const usuario = await this.getOne(id);
+        // Log para depuração
+        console.log('[getUsuarioComIdEscola] Usuario carregado:', usuario);
+        const usuarioLocalStorage = {
+            id: usuario.id,
+            nome: usuario.nome,
+            celular: usuario.celular,
+            tipoUsuario: usuario.tipoUsuario,
+            dataNascimento: usuario.dataNascimento,
+            fotoUrl: usuario.fotoUrl,
+            idEscola: usuario.escola?.id || '',
+        };
+        console.log('[getUsuarioComIdEscola] Objeto para localStorage:', usuarioLocalStorage);
+        return usuarioLocalStorage;
+    }
+    async updateFotoUrl(id: string, fotoUrl: string) {
+        try {
+            const docRef = doc(db, "usuario", id);
+            await updateDoc(docRef, { fotoUrl });
+            console.log("Foto do usuário atualizada com sucesso!");
+        } catch (e) {
+            throw new Error("Erro ao atualizar a foto do usuário!");
+        }
+    }
+    async updateNome(id: string, nome: string) {
+        try {
+            const docRef = doc(db, "usuario", id);
+            await updateDoc(docRef, { nome });
+            console.log("Nome atualizado com sucesso!");
+        } catch (e) {
+            throw new Error("Erro ao atualizar o nome!");
+        }
+    }
+
+    async updateCelular(id: string, celular: string) {
+        try {
+            const docRef = doc(db, "usuario", id);
+            await updateDoc(docRef, { celular });
+            console.log("Celular atualizado com sucesso!");
+        } catch (e) {
+            throw new Error("Erro ao atualizar o celular!");
+        }
+    }
     async inserir(usuario: Usuario) {
         try {
             console.log("Dados enviados para o Firestore:", {
                 tipoUsuario: usuario.tipoUsuario,
                 nome: usuario.nome,
+                email: usuario.email,
                 idEscola: usuario.escola.id,
                 CEP: usuario.CEP,
                 rua: usuario.rua,
@@ -29,11 +78,13 @@ class UsuarioDAO {
                 cidade: usuario.cidade,
                 dataNascimento: usuario.dataNascimento,
                 celular: usuario.celular,
+                fotoUrl: usuario.fotoUrl,
             });
 
-            const docRef = await addDoc(collection(db, "usuario"), {
+            await setDoc(doc(db, "usuario", usuario.id), {
                 tipoUsuario: usuario.tipoUsuario,
                 nome: usuario.nome,
+                email: usuario.email,
                 idEscola: usuario.escola.id,
                 CEP: usuario.CEP,
                 rua: usuario.rua,
@@ -44,9 +95,9 @@ class UsuarioDAO {
                 cidade: usuario.cidade,
                 dataNascimento: usuario.dataNascimento,
                 celular: usuario.celular,
+                fotoUrl: usuario.fotoUrl,
             });
-
-            console.log("Usuário inserido com sucesso! ID:", docRef.id);
+            console.log("Usuário inserido com sucesso! ID:", usuario.id);
         } catch (e) {
             console.error("Erro ao inserir o usuário:", e);
             throw new Error("Erro ao inserir o usuário!");
@@ -68,10 +119,15 @@ class UsuarioDAO {
                 usuario.celular = data.celular || "";
                 usuario.tipoUsuario = data.tipoUsuario || "";
                 usuario.dataNascimento = data.dataNascimento || "";
+                usuario.fotoUrl = data.fotoUrl || "";
+
+                // Log para depuração
+                console.log('[getOne] Dados do Firestore:', data);
 
                 if (data.idEscola && typeof data.idEscola === "string" && data.idEscola.trim() !== "") {
                     usuario.escola = await escolaDAO.getOne(data.idEscola); // Busca os dados completos da escola
                     usuario.escola.id = data.idEscola; // Adiciona o ID da escola ao objeto
+                    console.log('[getOne] idEscola atribuído:', usuario.escola.id);
                 } else {
                     console.warn("Nenhuma escola associada ao usuário ou ID inválido.");
                 }
@@ -79,6 +135,8 @@ class UsuarioDAO {
                 throw new Error("O documento não existe!");
             }
 
+            // Log final do usuário retornado
+            console.log('[getOne] Usuario retornado:', usuario);
             return usuario;
         } catch (e) {
             console.error(`Erro ao buscar o usuário com ID: ${id}. Detalhes:`, e);
@@ -100,6 +158,8 @@ class UsuarioDAO {
                 usuario.celular = data.celular || "";
                 usuario.tipoUsuario = data.tipoUsuario || "";
                 usuario.dataNascimento = data.dataNascimento || "";
+                usuario.fotoUrl = data.fotoUrl || "";
+
 
                 if (data.idEscola && typeof data.idEscola === "string" && data.idEscola.trim() !== "") {
                     usuario.escola = await escolaDAO.getOne(data.idEscola);

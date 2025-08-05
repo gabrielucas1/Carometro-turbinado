@@ -67,9 +67,15 @@ export default function ListaFuncionarios() {
                 
             )}
 
-            <button onClick={() => router.push("/adicionar/addFuncionario")} className="absolute bottom-4 right-4 p-4 bg-blue-400">
-                Adicionar
-            </button>
+            {usuarioLogado.tipoUsuario === TipoUsuario.ADMESCOLA && (
+                <button
+                    onClick={() => router.push("/adicionar/addFuncionario")}
+                    className="absolute bottom-4 right-4 flex items-center gap-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 py-3 px-8 text-white rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 font-bold tracking-wide text-lg"
+                >
+                    <span className="text-2xl">➕</span>
+                    <span>Adicionar</span>
+                </button>
+            )}
         </div>
     );
 }

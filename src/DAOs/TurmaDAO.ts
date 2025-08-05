@@ -12,7 +12,8 @@ class TurmaDAO {
             const docRef = await addDoc(collection(db, "turma"), {
                 idCurso: turma.curso.id,
                 nome: turma.nome,
-                ano: turma.ano
+                ano: turma.ano,
+                fotoUrl: turma.fotoUrl
             });
             console.log("Turma inserida com sucesso! ID: ", docRef.id);
         } catch (e) {
@@ -33,6 +34,8 @@ class TurmaDAO {
             turma.nome = data.nome
             turma.curso = await cursoDAO.getOne(data.idCurso)
             turma.ano = data.ano
+            turma.escola = turma.curso.escola // Adiciona o campo escola
+            turma.fotoUrl = data.fotoUrl || ""
         } else {
             throw new Error('Erro ao buscar turma!')
         }
@@ -54,6 +57,8 @@ class TurmaDAO {
             turma.nome = data.nome;
             turma.ano = data.ano;
             turma.curso = await cursoDAO.getOne(data.idCurso);
+            turma.escola = turma.curso.escola ;// Adicione esta linha
+            turma.fotoUrl = data.fotoUrl || "";
     
             turmas.push(turma);
         }
@@ -74,6 +79,9 @@ class TurmaDAO {
             turma.nome = data.nome
             turma.ano = data.ano
             turma.curso = await cursoDAO.getOne(data.idCurso)
+            turma.escola = turma.curso.escola;
+            turma.fotoUrl = data.fotoUrl || "";
+
 
             turmas.push(turma);
         }
@@ -87,7 +95,8 @@ class TurmaDAO {
             await setDoc(doc(db, "turma", turma.id), {
                 idCurso: turma.curso.id,
                 nome: turma.nome,
-                ano: turma.ano
+                ano: turma.ano,
+                fotoUrl: turma.fotoUrl
             })
             console.log("Turma atualizada com sucesso!")
         } catch (e) {

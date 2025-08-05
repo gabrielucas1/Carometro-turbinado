@@ -68,11 +68,14 @@ export default function ListaEscola() {
                 })}
             </div>
 
-            {/*NÃO TEM OPÇAO DE ADICIONAR QUANDO A TELA É APENAS PARA ESCOLHER UMA ESCOLA*/}
+
+            {/* Somente ADMGERAL pode adicionar escola */}
             {idFuncionario == null &&
-                <Link href={"/adicionar/addEscola"}>
-                    <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">Adicionar</button>
-                </Link>
+                usuarioLogado?.tipoUsuario === "admGeral" && (
+                    <Link href={"/adicionar/addEscola"}>
+                        <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">Adicionar</button>
+                    </Link>
+                )
             }
 
 

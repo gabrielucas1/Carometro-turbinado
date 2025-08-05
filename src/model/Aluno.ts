@@ -14,6 +14,7 @@ export default class Aluno {
     cidade: string;
     complemento: string;
     fotoUrl: string;
+    idEscola?: string;
 
     constructor() {
         this.id = "";
@@ -29,5 +30,6 @@ export default class Aluno {
         this.cidade = "";
         this.complemento = "";
         this.fotoUrl = "";
+        this.idEscola = "";
     }
 }

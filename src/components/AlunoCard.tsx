@@ -1,8 +1,10 @@
 import Aluno from "@/model/Aluno";
 import alunoDAO from "@/DAOs/AlunoDAO";
 import { useRouter } from "next/navigation";
+import TurmaAluno from "@/model/TurmaAluno";
+import Escola from "@/model/Escola";
 
-export default function AlunoCard({ aluno, onDelete }: { aluno: Aluno; onDelete?: () => void }) {
+export default function AlunoCard({ aluno, onDelete }: { aluno: Aluno; onDelete?: () => void}) {
     const router = useRouter()
 
     console.log("ALUNO1:", aluno);
@@ -13,7 +15,7 @@ export default function AlunoCard({ aluno, onDelete }: { aluno: Aluno; onDelete?
 
     function editarAluno(e: React.MouseEvent) {
         e.stopPropagation();
-        router.push(`/editar/editAluno?id=${aluno.id}`)
+        router.push(`/editar/editarAluno?id=${aluno.id}`)
     }
 
     async function excluirAluno(e: React.MouseEvent) {

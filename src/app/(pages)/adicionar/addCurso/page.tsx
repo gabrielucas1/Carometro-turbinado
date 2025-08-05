@@ -81,12 +81,10 @@ export default function AddCurso() {
         const curso = new Curso();
         curso.nome = valorInput.nome;
         curso.turno = valorInput.turno;
-        curso.escola = { id: usuarioLogado.escola.id }; // Atribui apenas o ID da escola
 
         try {
             console.log(`nome: ${curso.nome}`);
             console.log(`turno: ${curso.turno}`);
-            console.log(`idEscola: ${curso.escola.id}`); // Log simplificado
             await cursoDAO.inserir(curso);
             alert("Curso adicionado com sucesso!");
             router.push("/listas/listaCursos"); // Redireciona para a lista de cursos após adicionar

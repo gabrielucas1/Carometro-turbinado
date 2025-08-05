@@ -1,35 +1,43 @@
 "use client";
-
+import { UserContext } from "@/contexts/UserContext"; // Adicione esta linha
 import CursoCard from "@/components/CursoCard";
-import cursoDAO from "@/DAOs/CursoDAO";
+import CursoDAO from "@/DAOs/CursoDAO";
 import Curso from "@/model/Curso";
+import TipoUsuario from "@/model/Enums/TipoUsuario";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 
 export default function ListaCursos() {
     const [listaCursos, setListaCursos] = useState<Curso[]>([]);
     const [escolas, setEscolas] = useState<{ [key: string]: string }>({}); // Mapeia escolaId para nome da escola
+    const { usuarioLogado, carregando } = useContext(UserContext);
+    
+    
 
     useEffect(() => {
-        cursoDAO.getAll()
+        if(carregando) return;
+            CursoDAO.getAll()
             .then((cursos) => {
-                console.log("Cursos recebidos do DAO:", cursos); // Log dos cursos recebidos
+                const cursosDaEscola = cursos.filter(
+                    (curso) => curso.escola.id === usuarioLogado.escola.id
+                );
 
                 const escolasMap: { [key: string]: string } = {};
-                cursos.forEach((curso) => {
-                    if (curso.escola.id && !escolasMap[curso.escola.id]) {
-                        escolasMap[curso.escola.id] = curso.escola.nome; // Usa o nome da escola já carregado
-                    }
+                cursosDaEscola.forEach((curso) => {
+                    escolasMap[curso.escola.id] = curso.escola.nome;
+
                 });
 
                 setEscolas(escolasMap);
-                setListaCursos(cursos);
+                setListaCursos(cursosDaEscola);
             })
             .catch((e) => {
                 console.error("Erro ao buscar cursos:", e.message);
             });
-    }, []);
+        
+    }, [usuarioLogado,carregando]);
 
+    const isADMEscola = usuarioLogado?.tipoUsuario === TipoUsuario.ADMESCOLA;
     return (
         <>
             <h1 className="text-3xl mt-6">Cursos</h1>
@@ -38,15 +46,23 @@ export default function ListaCursos() {
                     <CursoCard
                         curso={curso}
                         key={curso.id}
-                        escola={escolas[curso.escola.id] || "Escola não encontrada"} 
+                        escola={escolas[curso.escola.id] || "Escola não encontrada"}
+                        usuarioLogado={usuarioLogado}
                     />
                 ))}
             </div>
-            <Link href={"/adicionar/addCurso"}>
-                <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">
-                    Adicionar
-                </button>
-            </Link>
+            {isADMEscola && (
+                <Link href={"/adicionar/addCurso"}>
+                    <button
+                        className="fixed bottom-8 right-8 flex items-center gap-3 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 border-2 border-blue-200"
+                    >
+                        <span className="text-2xl">➕</span>
+                        <span className="text-lg">Adicionar Curso</span>
+                    </button>
+                </Link>
+            )}
         </>
     );
 }
+
+//

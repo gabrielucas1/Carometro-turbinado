@@ -7,6 +7,7 @@ export default class RegistroProfessorTurma{
     disciplina: string
     periodo: string
     turma: Turma
+    tipoRegistro: string
     revisaoGeral: String
     data: Date
 
@@ -16,6 +17,7 @@ export default class RegistroProfessorTurma{
         this.disciplina = ""
         this.periodo = ""
         this.turma = new Turma
+        this.tipoRegistro = ""
         this.revisaoGeral = ""
         this.data = new Date()
     }

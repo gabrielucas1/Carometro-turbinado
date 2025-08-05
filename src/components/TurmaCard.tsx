@@ -11,7 +11,7 @@ export default function TurmaCard({turma, onDelete} : {turma: Turma; onDelete?: 
 
     function editarTurma(e: React.MouseEvent) {
         e.stopPropagation();
-        router.push(`/editar/editTurma?id=${turma.id}`)
+        router.push(`/editar/editarTurma?id=${turma.id}`)
     }
 
     async function excluirTurma(e: React.MouseEvent) {
@@ -33,8 +33,7 @@ export default function TurmaCard({turma, onDelete} : {turma: Turma; onDelete?: 
             }
         }
     }
-
-    return(
+return(
         <div className="shadow-sm border-gray-900 border-1 bg-gray-50 rounded-lg w-96 h-32 p-3 flex hover:w-[25rem] transition-all relative">
             {/* Botões de ação - sempre visíveis */}
             <div className="absolute top-2 right-2 flex gap-1">
@@ -59,8 +58,18 @@ export default function TurmaCard({turma, onDelete} : {turma: Turma; onDelete?: 
                 className="flex w-full cursor-pointer" 
                 onClick={() => navegarAlunos(turma.id)}
             >
-                <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg">
-                    <p className="text-3xl">{turma.nome[0]}</p>
+                <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg overflow-hidden">
+                    {turma.fotoUrl ? (
+                        <img 
+                            src={turma.fotoUrl} 
+                            width={80} 
+                            height={80}
+                            className="w-full h-full object-cover rounded-lg" 
+                            alt={`Foto da Turma ${turma.nome}`} 
+                        />
+                    ) : (
+                        <p className="text-3xl">{turma.nome[0]}</p>
+                    )}
                 </div>
                 <div className="px-3 flex flex-col gap-3 text-start h-full py-1">
                     <p className="text-xl">{turma.nome}</p>

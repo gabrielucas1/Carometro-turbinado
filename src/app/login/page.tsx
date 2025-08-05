@@ -33,31 +33,37 @@ export default function Login() {
         email,
         senha
       );
+      // Busca o usuário completo
       const usuario = await usuarioDAO.getOne(userCredential.user.uid);
-
       atualizarUsuarioLogado(usuario);
+
+      // Salva no localStorage com idEscola (garante filtragem)
+      const usuarioLocalStorage = await usuarioDAO.getUsuarioComIdEscola(usuario.id);
+      localStorage.setItem("usuario", JSON.stringify(usuarioLocalStorage));
+      console.log("Usuário salvo no localStorage após login:", usuarioLocalStorage);
 
       if (usuario) {
         console.log("Usuario logado com sucesso!", usuario.tipoUsuario);
         switch (usuario.tipoUsuario) {
-
           case TipoUsuario.ADMGERAL:
             console.log("PASSANDO!!!!!");
-            router.push("listas/listaEscolas");
+            router.push("/telaInicial/telaADM");
             break;
           case TipoUsuario.ADMESCOLA:
+            router.push("/telaInicial/telaADMEscola");
+          break;
           case TipoUsuario.FUNCIONARIO:
-            router.push("listas/listaFuncionarios");
+            router.push("/telaInicial/telaFuncionario");
             break;
-            default:
+          default:
             console.log("Tipo de usuário não reconhecido:", usuario.tipoUsuario);
         }
-        
       } else {
         alert("Usuário não encontrado!");
       }
     } catch (e) {
-       alert(`Erro no login! ${e}`);    }
+      alert(`Erro no login! ${e}`);
+    }
   };
 
   return (

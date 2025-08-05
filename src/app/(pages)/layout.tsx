@@ -7,6 +7,7 @@ import React, { useContext } from "react"
 import { UserContext } from "@/contexts/UserContext"
 import { Student, GraduationCap, UsersThree, DownloadSimple} from "@phosphor-icons/react";
 import NavButton from "@/components/NavButton"
+import { Book, House, ScrollText  } from 'lucide-react'
 
 export default function OutrasPaginasLayout({
     children,
@@ -25,45 +26,49 @@ export default function OutrasPaginasLayout({
                 {!carregando && 
                 <>
                     <div className="fixed left-0 flex flex-col gap-8 pt-6 w-28 h-full p-1 border-r-2 border-gray-900">
-                        {/* Funcionalidades específicas para ADMESCOLA */}
-                        {usuarioLogado.tipoUsuario == TipoUsuario.ADMESCOLA && (
-                            <>  
-                                <NavButton href="/listas/listaCursos" icon={Student} text="Alunos" ariaLabel='Ver Cursos'/>
-                                <NavButton href="/importarAluno" icon={DownloadSimple} text="Importar" ariaLabel='Importar Aluno'/>
+                        {/* Navegação ADMGERAL */}
+                        {usuarioLogado.tipoUsuario === TipoUsuario.ADMGERAL && (
+                            <>
+                                <NavButton href="/telaInicial/telaADM" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" />
+                                <NavButton href="/listas/listaEscolas" icon={GraduationCap} text="Escolas" ariaLabel="Ver Escolas" />
+                                <NavButton href="/listas/listaADMEscola" icon={UsersThree} text="Equipe" ariaLabel="Ver Administradores de Escola" />
                             </>
                         )}
 
-                        {/* Funcionalidade disponível para todos os tipos de usuário */}
-                        <NavButton href="/listas/listaEscolas" icon={GraduationCap} text="Escolas" ariaLabel='Ver Escolas'/>
+                        {/* Navegação ADMESCOLA */}
+                        {usuarioLogado.tipoUsuario === TipoUsuario.ADMESCOLA && (
+                            <>  
+                                <NavButton href="/telaInicial/telaADMEscola" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" />
+                                <NavButton href="/listas/listaTodosAlunos" icon={Student} text="Alunos" ariaLabel='Alunos'/>
+                                <NavButton href="/importarAluno" icon={DownloadSimple} text="Importar" ariaLabel='Importar Aluno'/>
+                                <NavButton href="/listas/listaCursos" icon={Book} text='Cursos' ariaLabel='Ver Cursos'/>
+                                <NavButton href="/listas/listaEscolas" icon={GraduationCap} text="Escolas" ariaLabel='Ver Escolas'/>
+                                <NavButton href="/listas/listaFuncionarios" icon={UsersThree} text="Equipe" ariaLabel='Ver Funcionários'/>
 
-                        {/* Funcionalidades para ADMGERAL e ADMESCOLA */}
-                        <NavButton
-                            href={
-                                usuarioLogado.tipoUsuario == TipoUsuario.ADMGERAL
-                                    ? "/listas/listaADMEscola" // ADMGERAL vê administradores de escola
-                                    : "/listas/listaFuncionarios" // ADMESCOLA e FUNCIONARIO veem funcionários
-                            }
-                            icon={UsersThree}
-                            text="Equipe"
-                            ariaLabel={usuarioLogado.tipoUsuario == TipoUsuario.ADMGERAL
-                                ? "Ver Administradores de Escola"
-                                : "Ver Funcionários"}
-                        />
 
-                        {/* 
-                            FUNCIONARIO:
-                            - Apenas vê "Escolas" e "Equipe" (listaFuncionarios)
-                            ADMESCOLA:
-                            - Vê "Alunos", "Importar", "Escolas" e "Equipe" (listaFuncionarios)
-                            ADMGERAL:
-                            - Vê "Escolas" e "Equipe" (listaADMEscola)
-                        */}
+                            </>
+                        )}
+
+                        {/* Navegação FUNCIONARIO */}
+                        {usuarioLogado.tipoUsuario === TipoUsuario.FUNCIONARIO && (
+                            <>
+                                <NavButton href="/telaInicial/telaFuncionario" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" />
+                                <NavButton href="/listas/listaEscolas" icon={GraduationCap} text="Escolas" ariaLabel="Ver Escolas" />
+                                <NavButton href="/listas/listaFuncionarios" icon={UsersThree} text="Equipe" ariaLabel="Ver Funcionários" />
+                                <NavButton href="/listas/listaCursos" icon={Book} text='Cursos' ariaLabel='Ver Cursos'/>
+                                {/* <NavButton href="/telaInicial/telaFuncionario" icon={ ScrollText } text='Turmas' ariaLabel='Ver Turmas'/>
+                                <NavButton href="/telaInicial/telaADMEscola" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" /> */}
+
+
+
+                            </>
+                        )}
                     </div>
                     <div className="ml-28 w-full flex flex-col items-center">
                         {children}
                     </div>
                 </>
-                }               
+                }
             </main>
         </>
     )

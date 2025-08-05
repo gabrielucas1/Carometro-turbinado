@@ -176,31 +176,37 @@ export default function PerfilTurma() {
             doc.text('Nenhum registro encontrado.', xPosition, 30);
         }
 
-        registrosTurma.forEach((registro) => {
-            const professoresNoRepeat: string[] = []
-            if (!professoresNoRepeat.includes(registro.usuario.nome)) {
-                const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }).format(registro.data);
+        const blocoRegistroAltura = lineHeight + lineHeight * 1.5 + lineHeight * 4 + lineHeight + 6; // altura total do bloco do registro
+        registrosTurma.filter(r => r.turma.id === turma.id).forEach((registro) => {
+            const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(registro.data);
 
+            // Se não houver espaço suficiente para o bloco, adiciona nova página
+            if (yPosition + blocoRegistroAltura > pageHeight - 10) {
+                doc.addPage();
+                doc.setLineWidth(1.1);
+                doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+                yPosition = 20;
+                doc.text(`Relatórios da turma: ${turma.nome}`, xPosition, yPosition);
                 yPosition += lineHeight;
-                doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-                yPosition += lineHeight * 1.5;
-                doc.text(`Professor: ${registro.usuario}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Disciplina: ${registro.disciplina}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Período: ${registro.periodo}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Revisão Geral: ${registro.revisaoGeral}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`======================================`, xPosition, yPosition);
-                yPosition += lineHeight + 6;
-
-                professoresNoRepeat.push(registro.usuario.nome)
             }
+
+            yPosition += lineHeight;
+            doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
+            yPosition += lineHeight * 1.5;
+            doc.text(`Professor: ${registro.usuario?.nome || "(não informado)"}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Disciplina: ${registro.disciplina || ""}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Período: ${registro.periodo || ""}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`Revisão Geral: ${registro.revisaoGeral || ""}`, xPosition, yPosition);
+            yPosition += lineHeight;
+            doc.text(`======================================`, xPosition, yPosition);
+            yPosition += lineHeight + 6;
         })
 
         for (const aluno of alunos) {
@@ -241,24 +247,20 @@ export default function PerfilTurma() {
 
             const professoresNoRepeat: string[] = []; // Mover a declaração para fora do loop
             for (const registro of registrosAluno) {
-                if (!professoresNoRepeat.includes(registro.nomeProfessor)) {
-                    const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    }).format(registro.data);
+                const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(registro.data);
 
-                    doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-                    yPosition += lineHeight * 1.5;
-                    doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
-                    yPosition += lineHeight;
-                    doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
-                    yPosition += lineHeight;
-                    doc.text(`======================================`, xPosition, yPosition);
-                    yPosition += lineHeight + 6;
-
-                    professoresNoRepeat.push(registro.nomeProfessor);
-                }
+                doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
+                yPosition += lineHeight * 1.5;
+                doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
+                yPosition += lineHeight;
+                doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
+                yPosition += lineHeight;
+                doc.text(`======================================`, xPosition, yPosition);
+                yPosition += lineHeight + 6;
             }
         }
 
@@ -273,62 +275,43 @@ export default function PerfilTurma() {
 
     return (
         <>
-            <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-            <h1 className="mt-4 text-2xl">Perfil da turma</h1>
+            <div className="min-h-screen bg-white flex flex-col items-center py-10">
+                <div className="w-full max-w-3xl bg-blue-50 rounded-2xl shadow-lg p-8 mb-10 flex flex-col items-center">
+                    <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Perfil da Turma</h1>
+                    <div className="text-2xl text-gray-700 font-semibold mb-2">{turma.nome}</div>
+                </div>
 
-            <form onSubmit={salvar} className="flex flex-col items-center">
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mb-10">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Turma</h2>
+                    <div className="flex flex-col gap-4 items-center">
+                        {registrosTurma.filter(r => r.turma.id === turma.id).length > 0 ? (
+                            registrosTurma.filter(r => r.turma.id === turma.id).map((registro) => (
+                                <div key={registro.id} className="bg-blue-100 rounded-xl p-4 shadow flex flex-col gap-2 w-full max-w-md border border-blue-300">
+                                    <span className="font-bold text-lg text-blue-700">Tipo: {registro.tipoRegistro}</span>
+                                    <span className="text-gray-600">{registro.revisaoGeral}</span>
+                                    <span className="text-gray-600">Professor: {registro.usuario?.nome}</span>
+                                    {registro.disciplina && <span className="text-gray-600">Disciplina: {registro.disciplina}</span>}
+                                    {registro.periodo && <span className="text-gray-600">Período: {registro.periodo}</span>}
+                                </div>
+                            ))
+                        ) : (
+                            <span className="text-gray-500">Nenhum registro encontrado para esta turma.</span>
+                        )}
+                    </div>
+                </div>
 
-                <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
-                <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={nome} />
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mb-10">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Turma</h2>
+                    <button
+                        onClick={() => router.push(`/adicionar/addRegistroTurma?idTurma=${id}`)}
+                        className="mt-4 text-lg bg-[#3579FF] py-3 px-12 text-white rounded-full hover:px-16 transition-all duration-200 font-bold shadow"
+                    >
+                        Adicionar registro
+                    </button>
+                </div>
 
-                <button type="submit" className="fixed right-6 top-24 text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
-            </form>
-
-            <div className="border-t-2 border-black mt-10 w-full flex items-center flex-col">
-                <button onClick={navegarListaAlunos} className="absolute right-2 mt-4 text-lg bg-[#3579FF] py-2 px-4 text-white rounded-full hover:px-6 transition-all duration-200">Adicionar aluno</button>
-                <h2 className="text-2xl mt-4 ">Lista de Alunos</h2>
-
-                {alunos.length > 0 && (
-                    alunos.map((aluno) => (
-                        <button onClick={() => navegarPerfil(aluno.id)} key={aluno.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
-                            <p>{`Nome: ${aluno.nome}`}</p>
-                            <p>{`Data de Nascimento: ${aluno.dataNascimento}`}</p>
-                        </button>
-                    ))
-                )}
+                <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-4 bg-[#3579FF] text-white rounded-full hover:px-7 transition-all duration-200 font-bold shadow-lg">Gerar relatório</button>
             </div>
-
-            <div className="border-t-2 border-black mt-10 w-full flex items-center flex-col">
-                <h2 className="text-2xl mt-4">Adicionar Registro de Professor</h2>
-                <form onSubmit={adicionarRegistroProfessorTurma} className="flex flex-col items-center mt-4">
-                    <label htmlFor="disciplina" className="mb-1 self-start">Disciplina</label>
-                    <input id="disciplina" onChange={handleDisciplinaChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={disciplina} />
-
-                    <label htmlFor="periodo" className="mt-4 mb-1 self-start">Período</label>
-                    <input id="periodo" onChange={handlePeriodoChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={periodo} />
-
-                    <label htmlFor="revisaoGeral" className="mt-4 mb-1 self-start">Revisão Geral</label>
-                    <input id="revisaoGeral" onChange={handleRevisaoGeralChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={revisaoGeral} />
-
-                    <h3 className="text-xl mt-6">Observações por Aluno</h3>
-                    {alunos.length > 0 && (
-                        alunos.map((aluno) => (
-                            <div key={aluno.id} className="w-full">
-                                <label htmlFor={`observacao-${aluno.id}`} className="mt-4 mb-1 self-start">{`Observação para ${aluno.nome}`}</label>
-                                <input
-                                    id={`observacao-${aluno.id}`}
-                                    onChange={(e) => handleObservacaoChange(e, aluno.id)}
-                                    className="border-gray-400 p-1 border-2 rounded w-full h-9"
-                                    value={observacoes[aluno.id] || ''} // Pega a observação do aluno ou uma string vazia
-                                />
-                            </div>
-                        ))
-                    )}
-
-                    <button type="submit" className="mt-6 text-lg bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Adicionar Registro</button>
-                </form>
-            </div>
-            <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-3 bg-[#3579FF] text-white rounded-full hover:px-5 transition-all duration-200">Gerar relatório</button>
         </>
     )
 }

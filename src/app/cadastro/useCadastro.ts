@@ -30,6 +30,8 @@ export default function useCadastro() {
     const [numeroCasa, setNumeroCasa] = useState("")
     const [complemento, setComplemento] = useState("")
 
+    const [idEscolaSelecionada, setIdEscolaSelecionada] = useState("")
+
     //FUNÇÕES PARA SALVAR O VALOR DO INPUT
     function handleNome(e: React.ChangeEvent<HTMLInputElement>) {
         setNome(e.target.value)
@@ -90,8 +92,9 @@ export default function useCadastro() {
             const usuario: Usuario = {
                 id: "",
                 tipoUsuario: TipoUsuario.FUNCIONARIO,
-                escola: new Escola(),
+                escola: { id: idEscolaSelecionada }, 
                 nome: nome,
+                email: email,
                 CEP: cep,
                 rua: rua,
                 bairro: bairro,
@@ -101,10 +104,26 @@ export default function useCadastro() {
                 cidade: cidade,
                 dataNascimento: dataNascimento,
                 celular: celular,
+                fotoUrl: "",
+                usuario: { id: "", nome: "" }
             }
 
             try {
+                // Insere o usuário no Firestore
                 await usuarioDAO.inserir(usuario)
+
+                // Busca o usuário recém cadastrado para salvar no localStorage com idEscola garantido
+                // Busca pelo email cadastrado
+                const usuarios = await usuarioDAO.getAll();
+                const usuarioSalvo = usuarios.find(u => u.email === email || u.nome === nome);
+                let usuarioLocalStorage = null;
+                if (usuarioSalvo) {
+                    usuarioLocalStorage = await usuarioDAO.getUsuarioComIdEscola(usuarioSalvo.id);
+                    localStorage.setItem("usuario", JSON.stringify(usuarioLocalStorage));
+                    console.log("Usuário salvo no localStorage:", usuarioLocalStorage);
+                } else {
+                    console.warn("Usuário recém cadastrado não encontrado para salvar no localStorage.");
+                }
 
                 switch (usuario.tipoUsuario) {
                     case TipoUsuario.ADMGERAL: {
@@ -141,6 +160,7 @@ export default function useCadastro() {
         rua, handleRua,
         bairro, handleBairro,
         numeroCasa, handleNumeroCasa,
-        complemento, handleComplemento
+        complemento, handleComplemento,
+        setIdEscolaSelecionada
     }
 }
