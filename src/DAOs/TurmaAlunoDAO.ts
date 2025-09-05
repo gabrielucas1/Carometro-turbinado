@@ -62,13 +62,15 @@ class TurmaAlunoDAO {
         const alunos: Aluno[] = [];
         for (const doc of querySnapshot.docs) {
             const data = doc.data();
-
             if (data.idTurma == id) {
-                const aluno: Aluno = await alunoDAO.getOne(data.idAluno);
-                alunos.push(aluno);
+                try {
+                    const aluno: Aluno = await alunoDAO.getOne(data.idAluno);
+                    alunos.push(aluno);
+                } catch (err) {
+                    console.warn(`[WARN] Ignorando aluno não encontrado: ${data.idAluno}`);
+                }
             }
         }
-
         return alunos;
     }
 

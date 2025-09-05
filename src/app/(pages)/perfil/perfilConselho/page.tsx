@@ -89,6 +89,8 @@ function handleComments(alunoId: string, conselhoId: string) {
   if (carregando) return <div className="p-8">Carregando...</div>;
   if (!conselho) return <div className="p-8">Conselho não encontrado.</div>;
 
+  console.log("[DEBUG] Render conselho.turma:", conselho.turma);
+
   return (
     <div className="min-h-screen flex flex-col items-center py-10 bg-white">
       <div className="w-full max-w-3xl">

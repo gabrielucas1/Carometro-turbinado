@@ -40,35 +40,24 @@ export default function AddComentarioConselho() {
 
   const handleSalvar = async () => {
     if (!comentario || !professor || !aluno || !conselhoClasse) {
+      console.log("[ERRO] Campos obrigatórios faltando:", { comentario, professor, aluno, conselhoClasse });
+      setErro("Preencha todos os campos!");
+      return;
     }
     setCarregando(true);
     setErro("");
     try {
-      // Monta objeto simples para aluno
-      const alunoObj = aluno ? {
-        id: aluno.id,
-        nome: aluno.nome
-      } : {};
-      // Monta objeto simples para conselhoClasse
-      const conselhoClasseObj = conselhoClasse ? {
-        id: conselhoClasse.id,
-        nome: conselhoClasse.nome
-      } : {};
-      // Monta objeto simples para turma
-      const turmaObj = aluno && aluno.idTurma ? { id: aluno.idTurma } : {};
-      // Monta objeto simples para usuario
-      const usuarioObj = {
-        id: "",
-        tipoUsuario: TipoUsuario.FUNCIONARIO,
-        nome: professor
-      };
-      // Monta objeto simples para registroProfessorTurma
+      // Monta objeto RegistroProfessorTurma mínimo
       const registroProfessorTurma = {
         id: "",
         disciplina: "",
         periodo: "",
-        turma: turmaObj,
-        usuario: usuarioObj,
+        turma: aluno && aluno.idTurma ? { id: aluno.idTurma } : {},
+        usuario: {
+          id: "",
+          tipoUsuario: TipoUsuario.FUNCIONARIO,
+          nome: professor
+        },
         dataCriacao: new Date(),
         dataModificacao: new Date(),
         ativo: true,
@@ -76,80 +65,25 @@ export default function AddComentarioConselho() {
         tipoRegistro: "",
         revisaoGeral: "",
         data: new Date(),
-        conselhoClasse: conselhoClasseObj
+        conselhoClasse: conselhoClasse
       };
-      await registroProfessorDescricaoDAO.inserir({
+      const registroDescricao = {
         id: "",
-        aluno: alunoObj,
-        conselhoClasse: conselhoClasseObj,
+        aluno: { id: aluno.id, nome: aluno.nome },
+        conselhoClasse: { id: conselhoClasse.id, nome: conselhoClasse.nome },
         observacao: comentario,
         registroProfessor: registroProfessorTurma,
         dataCriacao: new Date(),
         dataModificacao: new Date(),
-      });
+      };
+      console.log("[DEBUG] registroDescricao a ser salvo:", registroDescricao);
+      await registroProfessorDescricaoDAO.inserir(registroDescricao);
       router.back();
     } catch (err) {
+      console.error("[ERRO] Falha ao salvar comentário:", err);
       setErro("Erro ao salvar comentário!");
     }
     setCarregando(false);
-        if (!comentario || !professor || !aluno || !conselhoClasse) {
-          console.log("[ERRO] Campos obrigatórios faltando:", { comentario, professor, aluno, conselhoClasse });
-          setErro("Preencha todos os campos!");
-          return;
-        }
-        setCarregando(true);
-        setErro("");
-        try {
-          // Monta objeto RegistroProfessorTurma mínimo
-          const registroProfessorTurma = {
-            id: "",
-            disciplina: "",
-            periodo: "",
-            turma: new Turma(),
-            usuario: {
-              id: "",
-              tipoUsuario: TipoUsuario.FUNCIONARIO,
-              escola: null,
-              nome: professor,
-              email: "",
-              CEP: "",
-              rua: "",
-              bairro: "",
-              complemento: "",
-              numeroCasa: "",
-              estado: "",
-              cidade: "",
-              dataNascimento: "",
-              celular: "",
-              fotoUrl: "",
-              usuario: { id: "", nome: "" }
-            } as Usuario,
-            dataCriacao: new Date(),
-            dataModificacao: new Date(),
-            ativo: true,
-            descricao: "",
-            tipoRegistro: "",
-            revisaoGeral: "",
-            data: new Date(),
-            conselhoClasse: conselhoClasse
-          };
-          const registroDescricao = {
-            id: "",
-            aluno: aluno,
-            conselhoClasse: conselhoClasse,
-            observacao: comentario,
-            registroProfessor: registroProfessorTurma,
-            dataCriacao: new Date(),
-            dataModificacao: new Date(),
-          };
-          console.log("[DEBUG] registroDescricao a ser salvo:", registroDescricao);
-          await registroProfessorDescricaoDAO.inserir(registroDescricao);
-          router.back();
-        } catch (err) {
-          console.error("[ERRO] Falha ao salvar comentário:", err);
-          setErro("Erro ao salvar comentário!");
-        }
-        setCarregando(false);
   };
 
   return (

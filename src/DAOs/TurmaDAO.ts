@@ -21,29 +21,6 @@ class TurmaDAO {
         }
     }
 
-    //GETONE
-    async getOne(id: string): Promise<Turma> {
-        const turma = new Turma()
-
-        const docRef = doc(db, "turma", id)
-        const querySnapshot = await getDoc(docRef)
-        if (querySnapshot.exists()) {
-            const data = querySnapshot.data()
-
-            turma.id = querySnapshot.id
-            turma.nome = data.nome
-            turma.curso = await cursoDAO.getOne(data.idCurso)
-            turma.ano = data.ano
-            turma.escola = turma.curso.escola // Adiciona o campo escola
-            turma.fotoUrl = data.fotoUrl || ""
-            console.log("[DEBUG] TurmaDAO.getOne - turma:", turma);
-        } else {
-            throw new Error('Erro ao buscar turma!')
-        }
-
-        return turma;
-    }
-
     async getByCursoId(idCurso: string): Promise<Turma[]> {
         const turmasRef = collection(db, "turma");
         const q = query(turmasRef, where("idCurso", "==", idCurso));
@@ -107,6 +84,24 @@ class TurmaDAO {
         }
     }
 
+    //GETONE
+    async getOne(id: string): Promise<Turma> {
+        const docRef = doc(db, "turma", id);
+        const querySnapshot = await getDoc(docRef);
+        if (querySnapshot.exists()) {
+            const data = querySnapshot.data();
+            const turma = new Turma();
+            turma.id = querySnapshot.id;
+            turma.nome = data.nome;
+            turma.ano = data.ano;
+            turma.curso = await cursoDAO.getOne(data.idCurso);
+            turma.escola = turma.curso.escola;
+            turma.fotoUrl = data.fotoUrl || "";
+            return turma;
+        } else {
+            throw new Error('Erro ao buscar turma!');
+        }
+    }
 
     //DELETE
     async deletar(id: string) {

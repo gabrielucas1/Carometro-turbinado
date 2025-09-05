@@ -166,10 +166,13 @@ useEffect(() => {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-        doc.setLineWidth(1.1);
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+        function desenharBorda() {
+            doc.setLineWidth(1.1);
+            doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+        }
 
-        // Nome centralizado
+        // Primeira página: borda, nome do aluno, foto, registros acadêmicos, título do conselho
+        desenharBorda();
         doc.setFontSize(28);
         doc.text(aluno.nome, pageWidth / 2, 30, { align: 'center' });
         doc.setFontSize(12);
@@ -210,7 +213,12 @@ useEffect(() => {
             // Paginação automática se passar do limite
             if (yPosition > pageHeight - 20) {
                 doc.addPage();
-                yPosition = 20;
+                desenharBorda();
+                yPosition = 105;
+                doc.setFontSize(16);
+                doc.text('Registro Acadêmico', pageWidth / 2, yPosition, { align: 'center' });
+                doc.setFontSize(12);
+                yPosition += 10;
             }
         });
 
@@ -225,6 +233,7 @@ useEffect(() => {
             doc.text('Nenhum registro de conselho disponível.', 30, yPosition);
             yPosition += 10;
         } else {
+            let primeiraPaginaConselho = true;
             comentariosConselho.forEach(comentario => {
                 doc.text(`Professor: ${comentario.registroProfessor?.usuario?.nome || ''}`, 30, yPosition);
                 yPosition += 7;
@@ -232,7 +241,12 @@ useEffect(() => {
                 yPosition += 10;
                 if (yPosition > pageHeight - 20) {
                     doc.addPage();
-                    yPosition = 20;
+                    desenharBorda();
+                    yPosition = 30;
+                    doc.setTextColor(0, 128, 0);
+                    doc.setFontSize(12);
+                    // Não repete título nem nome do aluno nas páginas seguintes
+                    primeiraPaginaConselho = false;
                 }
             });
         }

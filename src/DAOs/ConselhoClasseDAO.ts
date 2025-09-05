@@ -1,8 +1,17 @@
 import { db } from "@/firebase/firebase";
-import { collection, doc, getDocs, getDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc,addDoc } from "firebase/firestore";
 import ConselhoClasse from "@/model/ConselhoClasse";
 
 class ConselhoClasseDAO {
+  async inserir(conselho: ConselhoClasse) {
+    const turmaObj = conselho.turma;
+    await addDoc(collection(db, "conselhoClasse"), {
+      nome: conselho.nome,
+      turma: turmaObj ? { id: turmaObj.id, nome: turmaObj.nome } : null,
+      dataCriacao: conselho.dataCriacao,
+      dataModificacao: conselho.dataModificacao,
+    });
+  }
   async getOne(id: string): Promise<ConselhoClasse> {
     const docRef = doc(db, "conselhoClasse", id);
     const snapshot = await getDoc(docRef);

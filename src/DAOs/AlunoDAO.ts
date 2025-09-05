@@ -52,7 +52,8 @@ class AlunoDAO {
             aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
             
         } else {
-            throw new Error('Erro ao buscar aluno!');
+            console.error(`[ERRO] AlunoDAO.getOne - Aluno não encontrado! ID: ${id}`);
+            throw new Error(`Erro ao buscar aluno! ID: ${id}`);
         }
 
         return aluno;
@@ -97,7 +98,6 @@ class AlunoDAO {
                 const aluno: Aluno = new Aluno();
                 aluno.id = doc.id;
                 aluno.nome = data.nome;
-                aluno.email = data.email;
                 alunos.push(aluno);
             }
         }
