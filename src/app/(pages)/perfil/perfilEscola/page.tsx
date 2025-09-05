@@ -6,6 +6,7 @@ import { UserContext } from "@/contexts/UserContext"; // Importar o contexto do 
 import TipoUsuario from "@/model/Enums/TipoUsuario"; // Importar os tipos de usuário
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useContext, useEffect, useState } from "react"
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 export default function PerfilEscola() {
     const router = useRouter();
@@ -150,81 +151,128 @@ export default function PerfilEscola() {
         }
     }
 
+    // Definir breadcrumbs
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Escolas", href: "/listas/listaEscolas" },
+        { label: escola.nome || "Perfil da Escola", isActive: true }
+    ];
+
     return (
-        <div className="w-full flex items-center flex-col px-96 h-full">
-            <button onClick={btExcluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-            <h1 className="mt-4 text-2xl">Perfil da escola</h1>
-
-            <form onSubmit={btSalvar} className="flex flex-col items-center h-full">
-
-
-                <p className="mt-6 mb-1 self-start">Nome</p>
-                <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.nome} />
-
-                <div className="flex flex-row w-full gap-10">
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">CEP</p>
-                        <input onChange={getInput} id="cep" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.cep} />
+        <div className="w-full flex items-center flex-col px-4 py-10 min-h-screen bg-white">
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-xl border border-blue-100 animate-fade-in flex flex-col items-center">
+                <Breadcrumbs items={breadcrumbItems} />
+                <h1 className="text-4xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
+                    <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">🏫</span>
+                    Perfil da Escola
+                </h1>
+                {usuarioLogado.tipoUsuario === TipoUsuario.ADMGERAL ? (
+                    <form onSubmit={btSalvar} className="flex flex-col gap-6 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label htmlFor="nome" className="block mb-2 text-lg font-semibold text-gray-700">Nome</label>
+                                <input onChange={getInput} id="nome" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.nome} />
+                            </div>
+                            <div>
+                                <label htmlFor="cep" className="block mb-2 text-lg font-semibold text-gray-700">CEP</label>
+                                <input onChange={getInput} id="cep" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.cep} />
+                            </div>
+                            <div>
+                                <label htmlFor="rua" className="block mb-2 text-lg font-semibold text-gray-700">Rua</label>
+                                <input onChange={getInput} id="rua" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.rua} />
+                            </div>
+                            <div>
+                                <label htmlFor="bairro" className="block mb-2 text-lg font-semibold text-gray-700">Bairro</label>
+                                <input onChange={getInput} id="bairro" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.bairro} />
+                            </div>
+                            <div>
+                                <label htmlFor="numeroCasa" className="block mb-2 text-lg font-semibold text-gray-700">Número</label>
+                                <input onChange={getInput} id="numeroCasa" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.numeroCasa} />
+                            </div>
+                            <div>
+                                <label htmlFor="complemento" className="block mb-2 text-lg font-semibold text-gray-700">Complemento</label>
+                                <input onChange={getInput} id="complemento" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.complemento} />
+                            </div>
+                            <div>
+                                <label htmlFor="telefone" className="block mb-2 text-lg font-semibold text-gray-700">Telefone</label>
+                                <input onChange={getInput} id="telefone" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.telefone} />
+                            </div>
+                            <div>
+                                <label htmlFor="estado" className="block mb-2 text-lg font-semibold text-gray-700">Estado</label>
+                                <input onChange={getInput} id="estado" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.estado} />
+                            </div>
+                            <div>
+                                <label htmlFor="cidade" className="block mb-2 text-lg font-semibold text-gray-700">Cidade</label>
+                                <input onChange={getInput} id="cidade" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.cidade} />
+                            </div>
+                            <div>
+                                <label htmlFor="rede" className="block mb-2 text-lg font-semibold text-gray-700">Rede de Ensino</label>
+                                <input onChange={getInput} id="rede" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.rede} />
+                            </div>
+                            <div>
+                                <label htmlFor="tipoEnsino" className="block mb-2 text-lg font-semibold text-gray-700">Tipo de Ensino</label>
+                                <input onChange={getInput} id="tipoEnsino" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.tipoEnsino} />
+                            </div>
+                        </div>
+                        <div className="mt-6 flex gap-4 justify-end">
+                            <button onClick={btExcluir} type="button" className="bg-red-500 hover:bg-red-600 text-white py-2 px-8 rounded-full font-semibold shadow transition-all flex items-center gap-2">
+                                <span>🗑️</span> Excluir
+                            </button>
+                            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-8 rounded-full font-semibold shadow transition-all flex items-center gap-2">
+                                <span>💾</span> Salvar
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="flex flex-col gap-4 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Nome</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.nome}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">CEP</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.cep}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Rua</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.rua}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Bairro</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.bairro}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Número</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.numeroCasa}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Complemento</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.complemento}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Telefone</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.telefone}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Estado</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.estado}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Cidade</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.cidade}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Rede de Ensino</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.rede}</span>
+                            </div>
+                            <div>
+                                <span className="block mb-2 text-lg font-semibold text-gray-700">Tipo de Ensino</span>
+                                <span className="block p-3 rounded-xl w-full bg-blue-50 text-gray-800 shadow-sm">{valorInput.tipoEnsino}</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Rua</p>
-                        <input onChange={getInput} id="rua" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.rua} />
-                    </div>
-                </div>
-
-                <div className="flex flex-row w-full gap-10">
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Bairro</p>
-                        <input onChange={getInput} id="bairro" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.bairro} />
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Número da casa</p>
-                        <input onChange={getInput} id="numeroCasa" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.numeroCasa} />
-                    </div>
-                </div>
-
-                <div className="flex flex-row w-full gap-10">
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Complemento</p>
-                        <input onChange={getInput} id="complemento" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.complemento} />
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Telefone</p>
-                        <input onChange={getInput} id="telefone" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.telefone} />
-                    </div>
-                </div>
-
-                <div className="flex flex-row w-full gap-10">
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Estado</p>
-                        <input onChange={getInput} id="estado" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.estado} />
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Cidade</p>
-                        <input onChange={getInput} id="cidade" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.cidade} />
-                    </div>
-                </div>
-
-                <div className="flex flex-row w-full gap-10">
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Rede de Ensino</p>
-                        <input onChange={getInput} id="rede" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.rede} />
-                    </div>
-
-                    <div className="flex flex-col flex-1">
-                        <p className="mt-6 mb-1 self-start">Tipo de Ensino</p>
-                        <input onChange={getInput} id="tipoEnsino" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.tipoEnsino} />
-                    </div>
-                </div>
-
-
-                <button type="submit" className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
-
-            </form>
+                )}
+            </div>
         </div>
     )
 }

@@ -2,6 +2,7 @@
 
 import alunoDAO from "@/DAOs/AlunoDAO"
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
+import registroProfessorDescricaoDAO from "@/DAOs/RegistroProfessorDescricaoDAO"
 import { storage } from "@/firebase/firebase"
 import Aluno from "@/model/Aluno"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
@@ -11,6 +12,7 @@ import jsPDF from "jspdf"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
 import { getFirestore,collection,query,where,getDocs } from "firebase/firestore"
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 interface ValorInput {
     nome: string
@@ -28,6 +30,7 @@ interface ValorInput {
 export default function PerfilAluno() {
     const router = useRouter()
     const [registros, setRegistros] = useState<RegistroVidaAluno[]>([])
+    const [comentariosConselho, setComentariosConselho] = useState<any[]>([])
     const [aluno, setAluno] = useState<Aluno>(new Aluno)
     const [valorInput, setValorInput] = useState<ValorInput>({
         nome: "",
@@ -43,21 +46,20 @@ export default function PerfilAluno() {
     })
 
     // PEGANDO ID DO ALUNO QUE VEIO DA TELA LISTA ALUNOS
-    const searchParams = useSearchParams()
-    const id = searchParams.get('id')
+    const searchParams = useSearchParams();
+    const id = searchParams.get('id');
 
 useEffect(() => {
     async function fetchData() {
         if (id) {
             try {
-                const alunoBuscado = await alunoDAO.getOne(id) // estou buscando os dados do aluno pelo id dele
-
-                const db = getFirestore() // pega a instancia do firestore para fazer as consultas
-                const turmaAlunoQuery = query(collection(db, "turmaAluno"), where("idAluno", "==", id)) //estou montando a seleção para buscar no bd todos os documentos da coleção turmaAluno onde o idAluno é igual ao id do aluno que eu busquei
-                const turmaAlunoSnapshot = await getDocs(turmaAlunoQuery) // executa a consulta e retorna 
-                let idTurma = "" // variavel que vai guardar o id da turma
-                turmaAlunoSnapshot.forEach((doc) => { // o for each vai percorrer todos os documentos que vieram da consulta
-                    idTurma = doc.data().idTurma // aqui eu pego o id da turma do aluno
+                const alunoBuscado = await alunoDAO.getOne(id)
+                const db = getFirestore()
+                const turmaAlunoQuery = query(collection(db, "turmaAluno"), where("idAluno", "==", id))
+                const turmaAlunoSnapshot = await getDocs(turmaAlunoQuery)
+                let idTurma = ""
+                turmaAlunoSnapshot.forEach((doc) => {
+                    idTurma = doc.data().idTurma
                 })
 
                 setAluno({ ...alunoBuscado, idTurma })
@@ -76,6 +78,10 @@ useEffect(() => {
 
                 const registros = await registroVidaAlunoDAO.getAll(id)
                 setRegistros(registros)
+
+                // Buscar comentários do conselho de classe para o aluno
+                const comentarios = await registroProfessorDescricaoDAO.getByAluno(id)
+                setComentariosConselho(comentarios)
             } catch (e: any) {
                 console.log(e.message)
             }
@@ -158,136 +164,187 @@ useEffect(() => {
 
     async function gerarRelatorio() {
         const doc = new jsPDF();
-
-        // Dimensões da página (em milímetros)
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-
         doc.setLineWidth(1.1);
+        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
 
-        // Desenhar um retângulo ao redor da página (x, y, largura, altura)
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);  // Ajustar as margens de acordo com a necessidade
+        // Nome centralizado
+        doc.setFontSize(28);
+        doc.text(aluno.nome, pageWidth / 2, 30, { align: 'center' });
+        doc.setFontSize(12);
 
+        // Foto à esquerda
         const response = await fetch(aluno.fotoUrl);
-
-        //IMG.SRC SÓ ACEITA TIPO BLOB, POR ISSO A CONVERSÃO
         const blob = await response.blob();
         const img = new Image();
         img.src = URL.createObjectURL(blob);
+        doc.addImage(img, 'JPEG', 20, 40, 50, 50);
 
-        doc.addImage(img, 'JPEG', 10, 10, 40, 50);
-
-        const lineHeight = 10;
-        let yPosition = 20;
-        let xPosition = 56;
-
-        doc.text(`Nome: ${aluno.nome}`, xPosition, yPosition);
-        yPosition += lineHeight
-        doc.text(`Data de Nascimento: ${aluno.dataNascimento}`, xPosition, yPosition);
-        yPosition += lineHeight
-        doc.text(`Cidade: ${aluno.cidade}`, xPosition, yPosition);
-
-        // doc.text(`Telefone: ${aluno.telefone}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`CEP: ${aluno.cep}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`Rua: ${aluno.rua}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`Bairro: ${aluno.bairro}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`Número: ${aluno.numeroEndereco}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`Estado: ${aluno.estado}`, 10, yPosition);
-        // yPosition += lineHeight;
-        // doc.text(`Complemento: ${aluno.complemento}`, 10, yPosition);
-
-        xPosition = 10
-        yPosition = 76
-        doc.text('Registros da Vida do Aluno:', 10, yPosition);
-        yPosition += lineHeight + 6;
+        // Timeline dos registros
+        let yPosition = 105;
+        doc.setFontSize(16);
+        doc.text('Registro Acadêmico', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFontSize(12);
+        yPosition += 10;
 
         registros.forEach((registro, index) => {
             const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+                day: '2-digit', month: '2-digit', year: 'numeric'
             }).format(registro.data);
-
-            doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-            yPosition += lineHeight * 1.5;
-            doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`======================================`, xPosition, yPosition);
-            yPosition += lineHeight + 6;
+            doc.setTextColor(255, 0, 0); // vermelho para eventos
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${dataFormatada}`, 20, yPosition);
+            doc.setFont('helvetica', 'normal');
+            yPosition += 7;
+            doc.text(`Evento: ${registro.tipoRegistro}`, 30, yPosition);
+            yPosition += 7;
+            doc.text(`Descrição: ${registro.descricao}`, 30, yPosition);
+            yPosition += 7;
+            if (registro.nomeProfessor) {
+                doc.text(`Professor: ${registro.nomeProfessor}`, 30, yPosition);
+                yPosition += 7;
+            }
+            doc.line(20, yPosition, pageWidth - 20, yPosition);
+            yPosition += 10;
+            // Paginação automática se passar do limite
+            if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+            }
         });
+
+        // Seção do Conselho de Classe
+        yPosition += 10;
+        doc.setTextColor(0, 128, 0); // verde para conselhos
+        doc.setFontSize(16);
+        doc.text('CONSELHO DE CLASSE', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFontSize(12);
+        yPosition += 10;
+        if (comentariosConselho.length === 0) {
+            doc.text('Nenhum registro de conselho disponível.', 30, yPosition);
+            yPosition += 10;
+        } else {
+            comentariosConselho.forEach(comentario => {
+                doc.text(`Professor: ${comentario.registroProfessor?.usuario?.nome || ''}`, 30, yPosition);
+                yPosition += 7;
+                doc.text(comentario.observacao, 35, yPosition);
+                yPosition += 10;
+                if (yPosition > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+            });
+        }
+        doc.setTextColor(0, 0, 0); // volta para preto
 
         doc.save('relatorio-aluno-com-registros.pdf');
     }
 
-
+    // Definir breadcrumbs dinâmicos
+    const idTurma = searchParams.get("idTurma");
+    const idCurso = searchParams.get("idCurso");
+    let breadcrumbItems: BreadcrumbItem[];
+    if (idTurma && idCurso) {
+        breadcrumbItems = [
+            { label: "Cursos", href: "/listas/listaCursos" },
+            { label: "Turmas", href: `/listas/listaTurmas?id=${idCurso}` },
+            { label: "Alunos", href: `/listas/listaAlunos?idTurma=${idTurma}&idCurso=${idCurso}` },
+            { label: aluno.nome || "Perfil do Aluno", isActive: true }
+        ];
+    } else {
+        breadcrumbItems = [
+            { label: "Alunos", href: "/listas/listaTodosAlunos" },
+            { label: aluno.nome || "Perfil do Aluno", isActive: true }
+        ];
+    }
 
     return (
-        <>
-            <section className="w-full flex flex-col justify-center items-center pt-6">
-                <h1 className="mt-4 text-2xl hidden">Perfil do Aluno</h1>
-
-                <img src={aluno.fotoUrl} width={150}  className="rounded-lg border-gray-900 border shadow-sm" alt="Foto do Aluno" />
-
-                <form onSubmit={salvar} className="flex flex-col items-center h-full w-full px-96">
-                    <label htmlFor="nome" className="mt-6 mb-1  self-start">Nome</label>
-                    <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.nome} />
-
-                    
-                    <label htmlFor="cep" className="mt-6 mb-1 self-start">CEP</label>
-                    <input onChange={getInput} id="cep" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.cep} />
-
-                    <label htmlFor="rua" className="mt-6 mb-1 self-start">Rua</label>
-                    <input onChange={getInput} id="rua" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.rua} />
-
-                    <label htmlFor="bairro" className="mt-6 mb-1 self-start">Bairro</label>
-                    <input onChange={getInput} id="bairro" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.bairro} />
-
-                    <label htmlFor="numeroEndereco" className="mt-6 mb-1 self-start">Número</label>
-                    <input onChange={getInput} id="numeroEndereco" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.numeroEndereco} />
-
-                    <label htmlFor="estado" className="mt-6 mb-1 self-start">Estado</label>
-                    <input onChange={getInput} id="estado" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.estado} />
-
-                    <label htmlFor="cidade" className="mt-6 mb-1 self-start">Cidade</label>
-                    <input onChange={getInput} id="cidade" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.cidade} />
-
-                    <label htmlFor="complemento" className="mt-6 mb-1 self-start">Complemento</label>
-                    <input onChange={getInput} id="complemento" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.complemento} />
-
-                    <label htmlFor="telefone" className="mt-6 mb-1 self-start">Telefone</label>
-                    <input onChange={getInput} id="telefone" className="border-gray-400 p-1 border-2 rounded w-full h-11" value={valorInput.telefone} />
-
-                    <label htmlFor="dataNascimento" className="mt-6 mb-1 self-start">Data de Nascimento</label>
-                    <input onChange={getInput} id="dataNascimento" className="border-gray-400 mb-6 p-1 border-2 rounded w-full h-11" value={valorInput.dataNascimento} />
-
-                    <div className="mt-4 mb-6 flex space-x-10">
-                        <button onClick={excluir} className="text-lg bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-                        <button type="submit" className="text-lg bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
+        <div className="min-h-screen bg-white flex flex-col items-center py-10">
+            <div className="w-full max-w-2xl mb-2">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-2xl border border-blue-100 animate-fade-in flex flex-col items-center">
+                <h1 className="text-4xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
+                    <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">👤</span>
+                    Perfil do Aluno
+                </h1>
+                <img src={aluno.fotoUrl} width={150} className="rounded-lg border-gray-900 border shadow-md mb-6" alt="Foto do Aluno" />
+                <form onSubmit={salvar} className="flex flex-col gap-6 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="nome" className="block mb-2 text-lg font-semibold text-gray-700">Nome</label>
+                            <input onChange={getInput} id="nome" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.nome} />
+                        </div>
+                        <div>
+                            <label htmlFor="dataNascimento" className="block mb-2 text-lg font-semibold text-gray-700">Data de Nascimento</label>
+                            <input onChange={getInput} id="dataNascimento" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.dataNascimento} />
+                        </div>
+                        <div>
+                            <label htmlFor="telefone" className="block mb-2 text-lg font-semibold text-gray-700">Telefone</label>
+                            <input onChange={getInput} id="telefone" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.telefone} />
+                        </div>
+                        <div>
+                            <label htmlFor="cep" className="block mb-2 text-lg font-semibold text-gray-700">CEP</label>
+                            <input onChange={getInput} id="cep" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.cep} />
+                        </div>
+                        <div>
+                            <label htmlFor="rua" className="block mb-2 text-lg font-semibold text-gray-700">Rua</label>
+                            <input onChange={getInput} id="rua" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.rua} />
+                        </div>
+                        <div>
+                            <label htmlFor="bairro" className="block mb-2 text-lg font-semibold text-gray-700">Bairro</label>
+                            <input onChange={getInput} id="bairro" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.bairro} />
+                        </div>
+                        <div>
+                            <label htmlFor="numeroEndereco" className="block mb-2 text-lg font-semibold text-gray-700">Número</label>
+                            <input onChange={getInput} id="numeroEndereco" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.numeroEndereco} />
+                        </div>
+                        <div>
+                            <label htmlFor="estado" className="block mb-2 text-lg font-semibold text-gray-700">Estado</label>
+                            <input onChange={getInput} id="estado" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.estado} />
+                        </div>
+                        <div>
+                            <label htmlFor="cidade" className="block mb-2 text-lg font-semibold text-gray-700">Cidade</label>
+                            <input onChange={getInput} id="cidade" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.cidade} />
+                        </div>
+                        <div>
+                            <label htmlFor="complemento" className="block mb-2 text-lg font-semibold text-gray-700">Complemento</label>
+                            <input onChange={getInput} id="complemento" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" value={valorInput.complemento} />
+                        </div>
+                    </div>
+                    <div className="mt-6 flex gap-4 justify-end">
+                        <button onClick={excluir} type="button" className="bg-red-500 hover:bg-red-600 text-white py-2 px-8 rounded-full font-semibold shadow transition-all flex items-center gap-2">
+                            <span>🗑️</span> Excluir
+                        </button>
+                        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-8 rounded-full font-semibold shadow transition-all flex items-center gap-2">
+                            <span>💾</span> Salvar
+                        </button>
                     </div>
                 </form>
-
-            </section>
-
-            <section className="border-t-2 border-black w-full flex flex-col justify-center items-center">
-                <h2 className="mt-6 text-xl">Observações</h2>
-
-                {registros.map((registro) => (
-                    <div key={registro.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
-                        <p>{`TipoRegistro: ${registro.tipoRegistro}`}</p>
-                        <p>{`Descrição: ${registro.descricao}`}</p>
+            </div>
+            <div className="bg-white shadow-xl rounded-3xl p-8 w-full max-w-2xl border border-blue-100 mt-10 animate-fade-in flex flex-col items-center">
+                <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Vida do Aluno</h2>
+                {registros.length === 0 ? (
+                    <p className="text-lg text-gray-500">Nenhum registro encontrado.</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                        {registros.map((registro) => (
+                            <div key={registro.id} className="bg-blue-400 rounded-xl p-4 flex flex-col shadow-md hover:scale-105 transition-transform cursor-pointer">
+                                <p className="font-semibold text-white">Tipo: {registro.tipoRegistro}</p>
+                                <p className="text-white">{registro.descricao}</p>
+                                <p className="text-xs text-white mt-2">Professor: {registro.nomeProfessor}</p>
+                            </div>
+                        ))}
                     </div>
-                ))}
-
-                <button onClick={adicionarRegistroVidaAluno} className="mt-8 mb-8 text-lg bg-[#3579FF] py-2 px-6 text-white rounded-full hover:px-8 transition-all duration-200">Adicionar registro</button>
-            </section>
-            <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-3 bg-[#3579FF] text-white rounded-full hover:px-5 transition-all duration-200">Gerar relatório</button>
-        </>
+                )}
+                <button onClick={adicionarRegistroVidaAluno} className="mt-8 mb-2 text-lg bg-[#3579FF] py-2 px-8 text-white rounded-full hover:px-10 transition-all duration-200 font-semibold shadow flex items-center gap-2">
+                    <span>➕</span> Adicionar registro
+                </button>
+            </div>
+            <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-3 bg-[#3579FF] text-white rounded-full hover:px-5 transition-all duration-200 shadow-lg font-semibold flex items-center gap-2">
+                <span>📄</span> Gerar relatório
+            </button>
+        </div>
     )
 }

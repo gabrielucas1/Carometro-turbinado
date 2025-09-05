@@ -3,8 +3,9 @@ import TipoUsuario from "./Enums/TipoUsuario"
 export default class Usuario {
     id: string;
     tipoUsuario: TipoUsuario;
-    escola: { id: string; nome?: string }; // Apenas o ID da escola
+    escola: any;
     nome: string;
+    email: string;
     CEP: string;
     rua: string;
     bairro: string;
@@ -14,13 +15,15 @@ export default class Usuario {
     cidade: string;
     dataNascimento: string;
     celular: string;
-    usuario: { id: string; nome: string };
+    fotoUrl: string;
+    usuario: any;
 
     constructor() {
         this.id = "";
         this.tipoUsuario = TipoUsuario.VAZIO;
-        this.escola = { id: "" }; // Inicializa com apenas o ID
+        this.escola = { id: "" };
         this.nome = "";
+        this.email = "";
         this.CEP = "";
         this.rua = "";
         this.bairro = "";
@@ -31,5 +34,6 @@ export default class Usuario {
         this.dataNascimento = "";
         this.celular = "";
         this.usuario = { id: "", nome: "" };
+        this.fotoUrl = "";
     }
 }

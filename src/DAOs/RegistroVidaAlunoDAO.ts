@@ -1,5 +1,5 @@
 import { db } from "@/firebase/firebase";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, Timestamp } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, setDoc, Timestamp, QueryDocumentSnapshot, DocumentData, query, where } from "firebase/firestore";
 import RegistroVidaAluno from "@/model/RegistroVidaAluno";
 import TipoRegistro from "@/model/Enums/TipoRegistro";
 
@@ -20,8 +20,6 @@ class RegistroVidaAlunoDAO {
         }
     }
 
-    //GETONE NÃO EXISTE, POIS NÃO HÁ NECESSIDADE
-
     // GETALL
     async getAll(idAluno: String): Promise<RegistroVidaAluno[]> {
         const querySnapshot = await getDocs(collection(db, "registroVidaAluno"));
@@ -31,18 +29,59 @@ class RegistroVidaAlunoDAO {
                 const data = doc.data();
                 const registro = new RegistroVidaAluno();
 
-                registro.id = doc.id
+                registro.id = doc.id;
                 registro.tipoRegistro = data.tipoRegistro as TipoRegistro;
                 registro.descricao = data.descricao;
                 registro.idAluno = data.idAluno;
-                registro.nomeProfessor = data.nomeProfessor
-                registro.data = data.data.toDate()
+                registro.nomeProfessor = data.nomeProfessor;
+                registro.data = data.data.toDate();
 
                 registros.push(registro);
             }
         }
 
         return registros;
+    }
+
+    // GET BY TURMA ID
+    async getRegistrosByTurmaId(turmaId: string): Promise<RegistroVidaAluno[]> {
+        const registrosSnapshot = await getDocs(
+            query(collection(db, "registroVidaAluno"), where("idTurma", "==", turmaId))
+        );
+        return registrosSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                tipoRegistro: data.tipoRegistro,
+                descricao: data.descricao,
+                idAluno: data.idAluno,
+                nomeProfessor: data.nomeProfessor,
+                data: data.data.toDate(),
+            } as RegistroVidaAluno;
+        });
+    }
+
+    // GET ALL BY ALUNO AND TURMA
+    async getAllByAlunoAndTurma(idAluno: string, idTurma: string): Promise<RegistroVidaAluno[]> {
+        const registrosSnapshot = await getDocs(
+            query(
+                collection(db, "registroVidaAluno"),
+                where("idAluno", "==", idAluno),
+                where("idTurma", "==", idTurma)
+            )
+        );
+        return registrosSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                tipoRegistro: data.tipoRegistro,
+                descricao: data.descricao,
+                idAluno: data.idAluno,
+                idTurma: data.idTurma,
+                nomeProfessor: data.nomeProfessor,
+                data: data.data.toDate(),
+            } as RegistroVidaAluno;
+        });
     }
 
     // UPDATE

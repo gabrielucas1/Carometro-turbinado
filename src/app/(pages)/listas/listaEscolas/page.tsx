@@ -9,6 +9,7 @@ import Escola from "@/model/Escola"
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 export default function ListaEscola() {
     const router = useRouter()
@@ -56,26 +57,31 @@ export default function ListaEscola() {
         return <p>Nenhuma escola disponível.</p>;
     }
 
+    // Definir breadcrumbs
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Escolas", isActive: true }
+    ];
+
     return (
-        <div className="flex flex-col items-center w-full">
-            <h1 className="mt-6 text-2xl">Escolas</h1>
-
-            {/*RENDERIZA A LISTA DE ESCOLAS*/}
-            <div className="flex flex-col gap-4 py-6">
-                {listEscolas.map((escola) => {
-                    console.log("Escola carregada para o card:", escola); // Log para verificar o objeto escola
-                    return <EscolaCard key={escola.id} escola={escola} idFuncionario={idFuncionario} />;
-                })}
+        <div className="flex flex-col items-center min-h-screen w-full px-4 py-10 bg-white">
+            <div className="w-full max-w-3xl mx-auto">
+                <Breadcrumbs items={breadcrumbItems} />
+                <h1 className="text-3xl font-extrabold text-blue-700 mb-10 text-center tracking-tight">Escolas</h1>
+                {/*RENDERIZA A LISTA DE ESCOLAS*/}
+                <div className="flex flex-col gap-4 py-6 items-center">
+                    {listEscolas.map((escola) => {
+                        return <EscolaCard key={escola.id} escola={escola} idFuncionario={idFuncionario} />;
+                    })}
+                </div>
+                {/* Somente ADMGERAL pode adicionar escola */}
+                {idFuncionario == null &&
+                    usuarioLogado?.tipoUsuario === "admGeral" && (
+                        <Link href={"/adicionar/addEscola"}>
+                            <button className="fixed bottom-8 right-8 flex items-center gap-3 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:scale-105 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 border-2 border-blue-200">Adicionar Escola</button>
+                        </Link>
+                    )
+                }
             </div>
-
-            {/*NÃO TEM OPÇAO DE ADICIONAR QUANDO A TELA É APENAS PARA ESCOLHER UMA ESCOLA*/}
-            {idFuncionario == null &&
-                <Link href={"/adicionar/addEscola"}>
-                    <button className="absolute bottom-4 right-4 p-3 px-8 rounded-full bg-blue-400 hover:px-9 transition-all">Adicionar</button>
-                </Link>
-            }
-
-
         </div>
     )
 }

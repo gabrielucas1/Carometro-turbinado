@@ -5,6 +5,7 @@ import Curso from "@/model/Curso"
 import Turno from "@/model/Enums/Turno"
 import { useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 interface ValorInput {
     nome: string,
@@ -109,12 +110,22 @@ export default function PerfilCurso() {
         }
     }
 
-    return (
-        <>
-            <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-            <h1 className="mt-4 text-2xl">Perfil do curso</h1>
+    // Definir breadcrumbs
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Escolas", href: "/listas/listaEscolas" },
+        { label: curso.escola?.nome || "Escola", href: `/perfil/perfilEscola?id=${curso.escola?.id}` },
+        { label: "Cursos", href: `/listas/listaCursos?idEscola=${curso.escola?.id}` },
+        { label: curso.nome || "Perfil do Curso", isActive: true }
+    ];
 
-            <form onSubmit={salvar} className="flex flex-col items-center h-full">
+    return (
+        <div className="w-full flex items-center flex-col px-4 py-10 min-h-screen bg-white">
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-xl border border-blue-100">
+                <Breadcrumbs items={breadcrumbItems} />
+                <button onClick={excluir} className="float-right text-lg mb-4 bg-red-500 py-2 px-6 text-white rounded-full hover:bg-red-600 transition-all duration-200">Excluir</button>
+                <h1 className="text-2xl font-bold text-blue-700 mb-6">Perfil do Curso</h1>
+
+                <form onSubmit={salvar} className="flex flex-col items-center h-full">
 
 
                 <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
@@ -136,9 +147,10 @@ export default function PerfilCurso() {
                     <label className=""htmlFor="nome">Noturno</label>
                 </div>
 
-                <button type="submit" className="fixed right-6 top-[81vh] text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
+                <button type="submit" className="text-lg mt-10 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
 
             </form>
-        </>
+            </div>
+        </div>
     )
 }

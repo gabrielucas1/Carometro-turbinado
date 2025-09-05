@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebase";
 import Aluno from "@/model/Aluno";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, documentId } from "firebase/firestore";
 
 class AlunoDAO {
     //INSERIR
@@ -19,6 +19,7 @@ class AlunoDAO {
                 complemento: aluno.complemento,
                 fotoUrl: aluno.fotoUrl, 
                 idTurma: aluno.idTurma,
+                idEscola: aluno.idEscola // Salva corretamente o idEscola
             });
             console.log("Aluno inserido com sucesso! ID: ", docRef.id);
             return docRef.id;
@@ -64,42 +65,43 @@ class AlunoDAO {
         const turmaAlunoQuery = query(turmaAlunoRef, where("idTurma", "==", idTurma));
         const turmaAlunoSnapshot = await getDocs(turmaAlunoQuery);
     
+        console.log(`QqqqqqqqqqquerySnapshot: ${JSON.stringify(turmaAlunoSnapshot.docs.map(doc => doc.data()))}`);
+    
         // Extrair os ids de alunos associados à turma
         const idAlunos = turmaAlunoSnapshot.docs.map(doc => doc.data().idAluno);
+    
+        console.log(`iddddddddddddAlunos: ${JSON.stringify(idAlunos)}`);
     
         if (idAlunos.length === 0) {
             // Retornar lista vazia se não houver alunos associados
             return [];
         }
     
-        // Passo 2: Buscar os dados dos alunos com base nos ids obtidos
+        // Dividir IDs de alunos em grupos de até 10 para evitar limite do Firestore
+        const gruposIdAlunos = [];
+        for (let i = 0; i < idAlunos.length; i += 10) {
+            gruposIdAlunos.push(idAlunos.slice(i, i + 10));
+        }
+
+        console.log(`Grupos de IDs de alunos: ${JSON.stringify(gruposIdAlunos)}`);
         const alunos: Aluno[] = [];
-        for (const idAluno of idAlunos) {
-            const alunoDocRef = doc(db, "aluno", idAluno);
-            const alunoSnapshot = await getDoc(alunoDocRef);
-    
-            if (alunoSnapshot.exists()) {
-                const data = alunoSnapshot.data();
+        for (const grupo of gruposIdAlunos) {
+            const alunosRef = collection(db, "aluno");
+            const alunosQuery = query(alunosRef, where(documentId(), "in", grupo));
+            const alunosSnapshot = await getDocs(alunosQuery);
+            console.log(`Resultados da consulta para grupo ${JSON.stringify(grupo)}: ${JSON.stringify(alunosSnapshot.docs.map(doc => doc.data()))}`);
+
+            for (const doc of alunosSnapshot.docs) {
+                const data = doc.data();
+                console.log(`Dados do aluno: ${JSON.stringify(data)}`);
                 const aluno: Aluno = new Aluno();
-    
-                aluno.id = alunoSnapshot.id;
-                aluno.idTurma = data.idTurma;
+                aluno.id = doc.id;
                 aluno.nome = data.nome;
-                aluno.dataNascimento = data.dataNascimento;
-                aluno.telefone = data.telefone;
-                aluno.cep = data.cep;
-                aluno.rua = data.rua;
-                aluno.bairro = data.bairro;
-                aluno.numeroEndereco = data.numeroEndereco;
-                aluno.estado = data.estado;
-                aluno.cidade = data.cidade;
-                aluno.complemento = data.complemento;
-                aluno.fotoUrl = data.fotoUrl;
-    
+                aluno.email = data.email;
                 alunos.push(aluno);
             }
         }
-    
+
         return alunos;
     }    
 
@@ -124,6 +126,7 @@ class AlunoDAO {
             aluno.cidade = data.cidade;
             aluno.complemento = data.complemento;
             aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
+            aluno.idEscola = data.idEscola;
 
             alunos.push(aluno);
         }
@@ -147,6 +150,7 @@ class AlunoDAO {
                 complemento: aluno.complemento,
                 fotoUrl: aluno.fotoUrl, // Adicionar fotoUrl
                 idTurma: aluno.idTurma,
+                idEscola: aluno.idEscola // Salva corretamente o idEscola
             });
             console.log("Aluno atualizado com sucesso!");
         } catch (e) {

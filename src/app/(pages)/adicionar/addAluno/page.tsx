@@ -48,6 +48,15 @@ export default function AddAluno() {
             return;
         }
 
+        // Busca a turma completa para pegar o idEscola
+        const turma = await turmaDAO.getOne(idTurma);
+        if (!turma) {
+            alert("Turma não encontrada.");
+            return;
+        }
+
+        const idEscola = turma.curso?.escola?.id || "";
+
         const aluno = new Aluno();
         aluno.nome = valorInput.nome;
         aluno.dataNascimento = valorInput.dataNascimento;
@@ -59,7 +68,8 @@ export default function AddAluno() {
         aluno.estado = valorInput.estado;
         aluno.cidade = valorInput.cidade;
         aluno.complemento = valorInput.complemento;
-        aluno.idTurma = idTurma; 
+        aluno.idTurma = idTurma;
+        aluno.idEscola = idEscola;
 
         try {
             let fotoUrl = "";
@@ -73,12 +83,6 @@ export default function AddAluno() {
             aluno.fotoUrl = fotoUrl; // Adicione a URL da foto ao aluno
 
             const idAluno = await alunoDAO.inserir(aluno);
-
-            const turma = await turmaDAO.getOne(idTurma);
-            if (!turma) {
-                alert("Turma não encontrada.");
-                return;
-            }
 
             const turmaAluno = new TurmaAluno();
             turmaAluno.aluno = await alunoDAO.getOne(idAluno);
@@ -98,47 +102,74 @@ export default function AddAluno() {
     }
 
     return (
-        <>
-            <h1>Adicionar Aluno</h1>
-
-            <form onSubmit={adicionarAluno} className="flex flex-col px-96 w-full items-center">
-                <label className="mt-6 self-start" htmlFor="nome">Nome</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="nome" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="dataNascimento">Data de Nascimento</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="dataNascimento" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="telefone">Telefone</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="telefone" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="cep">CEP</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="cep" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="rua">Rua</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="rua" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="bairro">Bairro</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="bairro" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="numeroEndereco">Número do Endereço</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="numeroEndereco" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="estado">Estado</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="estado" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="cidade">Cidade</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="cidade" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="complemento">Complemento</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="complemento" type="text" />
-
-                <label className="mt-4 self-start" htmlFor="foto">Foto</label>
-                <input onChange={getInput} className="border-2 w-full rounded h-10" id="foto" type="file" />
-
-                <button type="submit" className="w-40 text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:w-44 transition-all duration-200">
-                    Adicionar
-                </button>
-            </form>
-        </>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300">
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-blue-100 animate-fade-in">
+                <h1 className="text-4xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
+                    <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">👤</span>
+                    Adicionar Aluno
+                </h1>
+                <form onSubmit={adicionarAluno} className="flex flex-col gap-7">
+                    <div>
+                        <label htmlFor="nome" className="block mb-2 text-lg font-semibold text-gray-700">Nome</label>
+                        <input onChange={getInput} id="nome" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required placeholder="Digite o nome do aluno" />
+                    </div>
+                    <div>
+                        <label htmlFor="dataNascimento" className="block mb-2 text-lg font-semibold text-gray-700">Data de Nascimento</label>
+                        <input onChange={getInput} id="dataNascimento" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="date" required />
+                    </div>
+                    <div>
+                        <label htmlFor="telefone" className="block mb-2 text-lg font-semibold text-gray-700">Telefone</label>
+                        <input onChange={getInput} id="telefone" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required placeholder="(99) 99999-9999" />
+                    </div>
+                    <div>
+                        <label htmlFor="cep" className="block mb-2 text-lg font-semibold text-gray-700">CEP</label>
+                        <input onChange={getInput} id="cep" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required placeholder="00000-000" />
+                    </div>
+                    <div>
+                        <label htmlFor="rua" className="block mb-2 text-lg font-semibold text-gray-700">Rua</label>
+                        <input onChange={getInput} id="rua" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required />
+                    </div>
+                    <div>
+                        <label htmlFor="bairro" className="block mb-2 text-lg font-semibold text-gray-700">Bairro</label>
+                        <input onChange={getInput} id="bairro" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required />
+                    </div>
+                    <div>
+                        <label htmlFor="numeroEndereco" className="block mb-2 text-lg font-semibold text-gray-700">Número do Endereço</label>
+                        <input onChange={getInput} id="numeroEndereco" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required />
+                    </div>
+                    <div>
+                        <label htmlFor="estado" className="block mb-2 text-lg font-semibold text-gray-700">Estado</label>
+                        <input onChange={getInput} id="estado" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required />
+                    </div>
+                    <div>
+                        <label htmlFor="cidade" className="block mb-2 text-lg font-semibold text-gray-700">Cidade</label>
+                        <input onChange={getInput} id="cidade" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" required />
+                    </div>
+                    <div>
+                        <label htmlFor="complemento" className="block mb-2 text-lg font-semibold text-gray-700">Complemento</label>
+                        <input onChange={getInput} id="complemento" className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm" type="text" />
+                    </div>
+                    <div>
+                        <label htmlFor="foto" className="block mb-2 text-lg font-semibold text-gray-700">Foto do Aluno (opcional)</label>
+                        <input onChange={getInput} id="foto" type="file" accept="image/*" className="border border-blue-200 p-3 rounded-xl w-full" />
+                    </div>
+                    <div className="flex gap-4 justify-end mt-4">
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-6 rounded-full font-semibold shadow transition-all"
+                        >
+                            <span className="mr-2">↩️</span> Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-full font-semibold shadow transition-all"
+                        >
+                            <span>➕ Adicionar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     );
 }

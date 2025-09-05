@@ -7,15 +7,19 @@ class RegistroProfessorTurmaDAO {
     async inserir(registro: RegistroProfessorTurma): Promise<string> {
         try {
             const docRef = await addDoc(collection(db, "registroProfessorTurma"), {
-                idUsuario: registro.usuario.id,  // Armazenando apenas o ID do usuário
+                usuario: {
+                    id: registro.usuario.id,
+                    nome: registro.usuario.nome,
+                    email: registro.usuario.email
+                },
                 disciplina: registro.disciplina,
                 periodo: registro.periodo,
-                idTurma: registro.turma.id,  // Armazenando apenas o ID da turma
+                idTurma: registro.turma.id,
                 revisaoGeral: registro.revisaoGeral,
                 data: Timestamp.fromDate(registro.data)
             });
             console.log("Registro do professor na turma inserido com sucesso! ID: ", docRef.id);
-            return docRef.id; // Retornando o ID do documento recém-criado
+            return docRef.id;
         } catch (e) {
             throw new Error("Erro ao inserir registro do professor na turma: " + e);
         }
@@ -32,10 +36,10 @@ class RegistroProfessorTurmaDAO {
             const data = querySnapshot.data();
 
             registro.id = querySnapshot.id;
-            registro.usuario.id = data.idUsuario;  // Atribuindo o ID do usuário
+            registro.usuario = data.usuario || { id: "", nome: "", email: "" };
             registro.disciplina = data.disciplina;
             registro.periodo = data.periodo;
-            registro.turma.id = data.idTurma;  // Atribuindo o ID da turma
+            registro.turma.id = data.idTurma;
             registro.revisaoGeral = data.revisaoGeral;
             registro.data = data.data.toDate();
         } else {
@@ -49,21 +53,18 @@ class RegistroProfessorTurmaDAO {
     async getAll(): Promise<RegistroProfessorTurma[]> {
         const querySnapshot = await getDocs(collection(db, "registroProfessorTurma"));
         const registros: RegistroProfessorTurma[] = [];
-                    console.log("Registro do professor na turma: ", registros);
 
-        for (const doc of querySnapshot.docs) {
-            const data = doc.data();
+        for (const docItem of querySnapshot.docs) {
+            const data = docItem.data();
             const registro = new RegistroProfessorTurma();
 
-            registro.id = doc.id;
-            registro.usuario.id = data.idUsuario;  // Atribuindo o ID do usuário
+            registro.id = docItem.id;
+            registro.usuario = data.usuario || { id: "", nome: "", email: "" };
             registro.disciplina = data.disciplina;
             registro.periodo = data.periodo;
-            registro.turma.id = data.idTurma;  // Atribuindo o ID da turma
+            registro.turma.id = data.idTurma;
             registro.revisaoGeral = data.revisaoGeral;
             registro.data = data.data.toDate();
-            console.log("Registro do professor na turma: ", registro);
-
             registros.push(registro);
         }
 
@@ -74,7 +75,11 @@ class RegistroProfessorTurmaDAO {
     async update(registro: RegistroProfessorTurma, id: string) {
         try {
             await setDoc(doc(db, "registroProfessorTurma", id), {
-                idUsuario: registro.usuario.id,
+                usuario: {
+                    id: registro.usuario.id,
+                    nome: registro.usuario.nome,
+                    email: registro.usuario.email
+                },
                 disciplina: registro.disciplina,
                 periodo: registro.periodo,
                 idTurma: registro.turma.id,

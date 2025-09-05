@@ -15,6 +15,7 @@ import jsPDF from "jspdf"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
 import TipoRegistro from "@/model/Enums/TipoRegistro"
+import Breadcrumbs, { BreadcrumbItem, createHierarchicalBreadcrumbs } from "@/components/Breadcrumbs"
 
 export default function PerfilTurma() {
     const [turma, setTurma] = useState<Turma>(new Turma)
@@ -31,7 +32,7 @@ export default function PerfilTurma() {
     const [revisaoGeral, setRevisaoGeral] = useState("")
     const router = useRouter()
     const [nome, setNome] = useState("")
-    const { usuarioLogado, atualizarUsuarioLogado } = useContext(UserContext);
+    const { usuarioLogado } = useContext(UserContext);
 
     //[key: string]: string DEFINE QUE O OBJETO TERÁ APENAS STRINGS
     const [observacoes, setObservacoes] = useState<{ [key: string]: string }>({})
@@ -44,6 +45,7 @@ export default function PerfilTurma() {
         if (id) {
             // Buscar a turma
             turmaDAO.getOne(id).then((turmaBuscada) => {
+                console.log("Turma buscada:", turmaBuscada);
                 setTurma(turmaBuscada);
                 setNome(turmaBuscada.nome);
             }).catch((e) => {
@@ -52,21 +54,26 @@ export default function PerfilTurma() {
 
             // Buscar os alunos da turma
             turmaAlunoDAO.getAlunos(id).then(async (alunos) => {
+                console.log("Alunos encontrados:", alunos);
                 setAlunos(alunos);
+                const registrosTemp: RegistroVidaAluno[] = [];
                 for (const aluno of alunos) {
                     try {
-                        const registros: RegistroVidaAluno[] = await registroVidaAlunoDAO.getAll(aluno.id); // Chame o método passando o ID do aluno
-                        setRegistrosAluno(registros) // Adiciona o registro ao array temporário
+                        const registros: RegistroVidaAluno[] = await registroVidaAlunoDAO.getAllByAlunoAndTurma(aluno.id, id);
+                        console.log(`Registros do aluno ${aluno.id} na turma ${id}:`, registros);
+                        registrosTemp.push(...registros);
                     } catch (e: any) {
-                        console.log(`Erro ao buscar registro para o aluno ${aluno.id}: ${e.message}`);
+                        console.log(`Erro ao buscar registro para o aluno ${aluno.id} na turma ${id}: ${e.message}`);
                     }
                 }
+                setRegistrosAluno(registrosTemp);
             }).catch((e) => {
                 console.log(e.message);
             });
 
             // Buscar os registros de professor da turma
             registroProfessorTurmaDAO.getAll().then((registros) => {
+                console.log("Registros de professor da turma:", registros);
                 setRegistrosTurma(registros);
             }).catch((e) => {
                 console.log(e.message);
@@ -155,180 +162,170 @@ export default function PerfilTurma() {
     }
 
     async function gerarRelatorio() {
-        const doc = new jsPDF();
+        try {
+            console.log("Iniciando geração do relatório...");
+            console.log("Registros do aluno:", registrosAluno);
+            console.log("Registros da turma:", registrosTurma);
 
-        // Dimensões da página (em milímetros)
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
+            const doc = new jsPDF();
 
-        doc.setLineWidth(1.1);
+            // Dimensões da página (em milímetros)
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
 
-        // Desenhar um retângulo ao redor da página (x, y, largura, altura)
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);  // Ajustar as margens de acordo com a necessidade
+            doc.setLineWidth(1.1);
 
-        const lineHeight = 10;
-        let yPosition = 20;
-        let xPosition = 10;
+            // Desenhar um retângulo ao redor da página (x, y, largura, altura)
+            doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
 
-        doc.text(`Relatórios da turma: ${turma.nome}`, xPosition, yPosition);
+            const lineHeight = 10;
+            let yPosition = 20;
+            let xPosition = 10;
 
-        if (registrosTurma.length === 0) {
-            doc.text('Nenhum registro encontrado.', xPosition, 30);
-        }
+            doc.text(`Relatórios da turma: ${turma.nome || "Nome não disponível"}`, xPosition, yPosition);
+            yPosition += lineHeight * 2;
 
-        registrosTurma.forEach((registro) => {
-            const professoresNoRepeat: string[] = []
-            if (!professoresNoRepeat.includes(registro.usuario.nome)) {
-                const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }).format(registro.data);
-
+            // Adicionar registros da turma primeiro
+            if (registrosTurma.filter(r => r.turma.id === turma.id).length > 0) {
+                doc.text('=== REGISTROS DA TURMA ===', xPosition, yPosition);
                 yPosition += lineHeight;
-                doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-                yPosition += lineHeight * 1.5;
-                doc.text(`Professor: ${registro.usuario}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Disciplina: ${registro.disciplina}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Período: ${registro.periodo}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Revisão Geral: ${registro.revisaoGeral}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`======================================`, xPosition, yPosition);
-                yPosition += lineHeight + 6;
 
-                professoresNoRepeat.push(registro.usuario.nome)
-            }
-        })
+                registrosTurma.filter(r => r.turma.id === turma.id).forEach((registro) => {
+                    // Verificar se há espaço suficiente
+                    if (yPosition + lineHeight * 4 > pageHeight - 10) {
+                        doc.addPage();
+                        doc.setLineWidth(1.1);
+                        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+                        yPosition = 20;
+                    }
 
-        for (const aluno of alunos) {
-            const response = await fetch(aluno.fotoUrl);
-
-            // IMG.SRC SÓ ACEITA TIPO BLOB, POR ISSO A CONVERSÃO
-            const blob = await response.blob();
-            const img = new Image();
-            img.src = URL.createObjectURL(blob);
-
-
-
-            if (yPosition > doc.internal.pageSize.getHeight() - 20) { // Checa se a posição excede a altura da página
-                doc.addPage(); // Adiciona nova página
-                yPosition = 20; // Reseta a posição vertical
-            }
-
-            doc.addImage(img, 'JPEG', xPosition, yPosition -10, 40, 50);
-
-            xPosition += 46;
-
-            doc.text(`Nome: ${aluno.nome}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Data de Nascimento: ${aluno.dataNascimento}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Cidade: ${aluno.cidade}`, xPosition, yPosition);
-
-            xPosition = 10;
-
-            yPosition += lineHeight * 3;
-
-            doc.text('Registros da Vida do Aluno:', xPosition, yPosition);
-            yPosition += lineHeight + 6;
-
-            if (registrosAluno.length === 0) {
-                doc.text('Nenhum registro encontrado.', xPosition, yPosition);
-            }
-
-            const professoresNoRepeat: string[] = []; // Mover a declaração para fora do loop
-            for (const registro of registrosAluno) {
-                if (!professoresNoRepeat.includes(registro.nomeProfessor)) {
-                    const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    }).format(registro.data);
-
-                    doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
+                    doc.text(`Tipo: ${registro.tipoRegistro || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Professor: ${registro.usuario?.nome || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Descrição: ${registro.revisaoGeral || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    if (registro.disciplina) {
+                        doc.text(`Disciplina: ${registro.disciplina}`, xPosition, yPosition);
+                        yPosition += lineHeight;
+                    }
+                    if (registro.periodo) {
+                        doc.text(`Período: ${registro.periodo}`, xPosition, yPosition);
+                        yPosition += lineHeight;
+                    }
+                    doc.text('-----------------------------------', xPosition, yPosition);
                     yPosition += lineHeight * 1.5;
-                    doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
-                    yPosition += lineHeight;
-                    doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
-                    yPosition += lineHeight;
-                    doc.text(`======================================`, xPosition, yPosition);
-                    yPosition += lineHeight + 6;
+                });
+            }
 
-                    professoresNoRepeat.push(registro.nomeProfessor);
+            // Adicionar registros dos alunos
+            if (registrosAluno.length > 0) {
+                yPosition += lineHeight;
+                doc.text('=== REGISTROS DOS ALUNOS ===', xPosition, yPosition);
+                yPosition += lineHeight;
+
+                for (const registro of registrosAluno) {
+                    // Verificar se há espaço suficiente
+                    if (yPosition + lineHeight * 5 > pageHeight - 10) {
+                        doc.addPage();
+                        doc.setLineWidth(1.1);
+                        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+                        yPosition = 20;
+                    }
+
+                    let dataFormatada = "Data não disponível";
+                    try {
+                        if (registro.data) {
+                            // Tentar diferentes formatos de data
+                            const data = typeof registro.data === 'string' ? new Date(registro.data) : registro.data;
+                            if (data instanceof Date && !isNaN(data.getTime())) {
+                                dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                }).format(data);
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Erro ao formatar data:", e);
+                    }
+
+                    doc.text(`Data: ${dataFormatada}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Tipo: ${registro.tipoRegistro || "Tipo não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Professor: ${registro.nomeProfessor || "Nome não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Descrição: ${registro.descricao || "Descrição não especificada"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text('-----------------------------------', xPosition, yPosition);
+                    yPosition += lineHeight * 1.5;
                 }
             }
+
+            if (registrosTurma.filter(r => r.turma.id === turma.id).length === 0 && registrosAluno.length === 0) {
+                doc.text('Nenhum registro encontrado para esta turma.', xPosition, yPosition);
+            }
+
+            // Salvar o PDF
+            doc.save(`relatorio-turma-${turma.nome || 'sem-nome'}.pdf`);
+            console.log("Relatório gerado com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao gerar relatório:", error);
+            alert("Erro ao gerar relatório. Verifique o console para mais detalhes.");
         }
-
-
-        // Salvar o PDF
-        doc.save('relatorio-alunos-com-registros.pdf');
     }
 
-
-
-
+    // Breadcrumbs ajustado para navegação correta
+    const idCurso = turma.curso?.id ?? "";
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Cursos", href: "/listas/listaCursos" },
+        turma.curso && { label: turma.curso.nome ?? "ADS", isActive: false },
+        { label: "Turmas", href: `/listas/listaTurmas?idCurso=${idCurso}` },
+        { label: turma.nome ?? "Turma", isActive: true }
+    ].filter(Boolean) as BreadcrumbItem[];
 
     return (
         <>
-            <button onClick={excluir} className="fixed right-6 top-6 text-lg mt-14 mb-10 bg-red-500 py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Excluir</button>
-            <h1 className="mt-4 text-2xl">Perfil da turma</h1>
+            <div className="min-h-screen bg-white flex flex-col items-center py-10">
+                <div className="w-full max-w-3xl bg-blue-50 rounded-2xl shadow-lg p-8 mb-10 flex flex-col items-center">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Perfil da Turma</h1>
+                    <div className="text-2xl text-gray-700 font-semibold mb-2">{turma.nome}</div>
+                </div>
 
-            <form onSubmit={salvar} className="flex flex-col items-center">
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mb-10">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Turma</h2>
+                    <div className="flex flex-col gap-4 items-center">
+                        {registrosTurma.filter(r => r.turma.id === turma.id).length > 0 ? (
+                            registrosTurma.filter(r => r.turma.id === turma.id).map((registro) => (
+                                <div key={registro.id} className="bg-blue-100 rounded-xl p-4 shadow flex flex-col gap-2 w-full max-w-md border border-blue-300">
+                                    <span className="font-bold text-lg text-blue-700">Tipo: {registro.tipoRegistro}</span>
+                                    <span className="text-gray-600">{registro.revisaoGeral}</span>
+                                    <span className="text-gray-600">Professor: {registro.usuario?.nome}</span>
+                                    {registro.disciplina && <span className="text-gray-600">Disciplina: {registro.disciplina}</span>}
+                                    {registro.periodo && <span className="text-gray-600">Período: {registro.periodo}</span>}
+                                </div>
+                            ))
+                        ) : (
+                            <span className="text-gray-500">Nenhum registro encontrado para esta turma.</span>
+                        )}
+                    </div>
+                </div>
 
-                <label htmlFor="nome" className="mt-6 mb-1 self-start">Nome</label>
-                <input onChange={getInput} id="nome" className="border-gray-400 p-1 border-2 rounded w-full h-9" value={nome} />
+                <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mb-10">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Turma</h2>
+                    <button
+                        onClick={() => router.push(`/adicionar/addRegistroTurma?idTurma=${id}`)}
+                        className="mt-4 text-lg bg-[#3579FF] py-3 px-12 text-white rounded-full hover:px-16 transition-all duration-200 font-bold shadow"
+                    >
+                        Adicionar registro
+                    </button>
+                </div>
 
-                <button type="submit" className="fixed right-6 top-24 text-lg mt-14 mb-10 bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Salvar</button>
-            </form>
-
-            <div className="border-t-2 border-black mt-10 w-full flex items-center flex-col">
-                <button onClick={navegarListaAlunos} className="absolute right-2 mt-4 text-lg bg-[#3579FF] py-2 px-4 text-white rounded-full hover:px-6 transition-all duration-200">Adicionar aluno</button>
-                <h2 className="text-2xl mt-4 ">Lista de Alunos</h2>
-
-                {alunos.length > 0 && (
-                    alunos.map((aluno) => (
-                        <button onClick={() => navegarPerfil(aluno.id)} key={aluno.id} className="bg-blue-400 rounded w-96 h-20 mt-8 p-4 flex flex-col hover:w-[26rem] transition-all cursor-pointer">
-                            <p>{`Nome: ${aluno.nome}`}</p>
-                            <p>{`Data de Nascimento: ${aluno.dataNascimento}`}</p>
-                        </button>
-                    ))
-                )}
+                <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-4 bg-[#3579FF] text-white rounded-full hover:px-7 transition-all duration-200 font-bold shadow-lg">Gerar relatório</button>
             </div>
-
-            <div className="border-t-2 border-black mt-10 w-full flex items-center flex-col">
-                <h2 className="text-2xl mt-4">Adicionar Registro de Professor</h2>
-                <form onSubmit={adicionarRegistroProfessorTurma} className="flex flex-col items-center mt-4">
-                    <label htmlFor="disciplina" className="mb-1 self-start">Disciplina</label>
-                    <input id="disciplina" onChange={handleDisciplinaChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={disciplina} />
-
-                    <label htmlFor="periodo" className="mt-4 mb-1 self-start">Período</label>
-                    <input id="periodo" onChange={handlePeriodoChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={periodo} />
-
-                    <label htmlFor="revisaoGeral" className="mt-4 mb-1 self-start">Revisão Geral</label>
-                    <input id="revisaoGeral" onChange={handleRevisaoGeralChange} className="border-gray-400 p-1 border-2 rounded w-full h-9" value={revisaoGeral} />
-
-                    <h3 className="text-xl mt-6">Observações por Aluno</h3>
-                    {alunos.length > 0 && (
-                        alunos.map((aluno) => (
-                            <div key={aluno.id} className="w-full">
-                                <label htmlFor={`observacao-${aluno.id}`} className="mt-4 mb-1 self-start">{`Observação para ${aluno.nome}`}</label>
-                                <input
-                                    id={`observacao-${aluno.id}`}
-                                    onChange={(e) => handleObservacaoChange(e, aluno.id)}
-                                    className="border-gray-400 p-1 border-2 rounded w-full h-9"
-                                    value={observacoes[aluno.id] || ''} // Pega a observação do aluno ou uma string vazia
-                                />
-                            </div>
-                        ))
-                    )}
-
-                    <button type="submit" className="mt-6 text-lg bg-[#3579FF] py-2 px-10 text-white rounded-full hover:px-12 transition-all duration-200">Adicionar Registro</button>
-                </form>
-            </div>
-            <button onClick={gerarRelatorio} className="fixed right-3 bottom-3 p-3 bg-[#3579FF] text-white rounded-full hover:px-5 transition-all duration-200">Gerar relatório</button>
         </>
     )
 }

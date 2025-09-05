@@ -7,6 +7,7 @@ import TipoUsuario from "@/model/Enums/TipoUsuario";
 import Usuario from "@/model/Usuario";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs";
 
 export default function ListaFuncionarios() {
     const router = useRouter();
@@ -14,6 +15,10 @@ export default function ListaFuncionarios() {
     const [carregando, setCarregando] = useState(true);
 
     const { usuarioLogado } = useContext(UserContext);
+
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Equipe", isActive: true },
+    ];
 
     useEffect(() => {
         setCarregando(true);
@@ -34,6 +39,9 @@ export default function ListaFuncionarios() {
 
     return (
         <div className="flex flex-col items-center w-full">
+                        <div className="w-full max-w-3xl mt-6">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
             <h1 className="mt-6 text-2xl">Funcionários</h1>
             {carregando ? (
                 <p>Carregando funcionários...</p>
@@ -67,9 +75,15 @@ export default function ListaFuncionarios() {
                 
             )}
 
-            <button onClick={() => router.push("/adicionar/addFuncionario")} className="absolute bottom-4 right-4 p-4 bg-blue-400">
-                Adicionar
-            </button>
+            {usuarioLogado.tipoUsuario === TipoUsuario.ADMESCOLA && (
+                <button
+                    onClick={() => router.push("/adicionar/addFuncionario")}
+                    className="absolute bottom-4 right-4 flex items-center gap-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 py-3 px-8 text-white rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-200 font-bold tracking-wide text-lg"
+                >
+                    <span className="text-2xl">➕</span>
+                    <span>Adicionar</span>
+                </button>
+            )}
         </div>
     );
 }

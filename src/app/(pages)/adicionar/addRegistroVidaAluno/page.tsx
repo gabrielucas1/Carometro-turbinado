@@ -58,37 +58,57 @@ export default function AddRegistroVidaAluno() {
     }
 
     return (
-        <>
-            <h1>Adicionar Registro Vida Alunos</h1>
-
-            <form onSubmit={submitForm} className="flex flex-col space-y-4">
-                <label htmlFor="tipoRegistro" className="text-lg font-medium">Tipo de Registro</label>
-                <select
-                    id="tipoRegistro"
-                    className="border p-2 rounded-md"
-                    value={valorInput.tipoRegistro}
-                    onChange={getInput}
-                >
-                    <option value="" disabled>Selecione o tipo de registro</option>
-                    <option value={TipoRegistro.MERITO}>Méritos</option>
-                    <option value={TipoRegistro.AVISO}>Avisos</option>
-                    <option value={TipoRegistro.DETALHE}>Detalhes</option>
-                </select>
-
-                <label htmlFor="descricao" className="text-lg font-medium">Descrição</label>
-                <textarea
-                    id="descricao"
-                    className="border p-2 rounded-md"
-                    value={valorInput.descricao}
-                    onChange={getInput}
-                    placeholder="Digite a descrição"
-                    rows={4}
-                />
-
-                <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition">
-                    Salvar Registro
-                </button>
-            </form>
-        </>
+        <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 flex flex-col items-center justify-center py-10">
+            <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-lg border border-blue-100 animate-fade-in flex flex-col items-center">
+                <h1 className="text-3xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
+                    <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">📝</span>
+                    Adicionar Registro Vida do Aluno
+                </h1>
+                <form onSubmit={submitForm} className="flex flex-col gap-7 w-full">
+                    <div>
+                        <label htmlFor="tipoRegistro" className="block mb-2 text-lg font-semibold text-gray-700">Tipo de Registro</label>
+                        <select
+                            id="tipoRegistro"
+                            className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm"
+                            value={valorInput.tipoRegistro}
+                            onChange={getInput}
+                            required
+                        >
+                            <option value="" disabled>Selecione o tipo de registro</option>
+                            <option value={TipoRegistro.MERITO}>Méritos</option>
+                            <option value={TipoRegistro.AVISO}>Avisos</option>
+                            <option value={TipoRegistro.DETALHE}>Detalhes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="descricao" className="block mb-2 text-lg font-semibold text-gray-700">Descrição</label>
+                        <textarea
+                            id="descricao"
+                            className="border border-blue-200 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm"
+                            value={valorInput.descricao}
+                            onChange={getInput}
+                            placeholder="Digite a descrição"
+                            rows={4}
+                            required
+                        />
+                    </div>
+                    <div className="flex gap-4 justify-end mt-4">
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-6 rounded-full font-semibold shadow transition-all flex items-center gap-2"
+                        >
+                            <span className="mr-2">↩️</span> Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-full font-semibold shadow transition-all flex items-center gap-2"
+                        >
+                            <span>💾</span> Salvar Registro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     )
 }
