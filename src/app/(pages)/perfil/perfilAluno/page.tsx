@@ -2,6 +2,7 @@
 
 import alunoDAO from "@/DAOs/AlunoDAO"
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
+import registroProfessorDescricaoDAO from "@/DAOs/RegistroProfessorDescricaoDAO"
 import { storage } from "@/firebase/firebase"
 import Aluno from "@/model/Aluno"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
@@ -11,6 +12,7 @@ import jsPDF from "jspdf"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
 import { getFirestore,collection,query,where,getDocs } from "firebase/firestore"
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 interface ValorInput {
     nome: string
@@ -28,6 +30,7 @@ interface ValorInput {
 export default function PerfilAluno() {
     const router = useRouter()
     const [registros, setRegistros] = useState<RegistroVidaAluno[]>([])
+    const [comentariosConselho, setComentariosConselho] = useState<any[]>([])
     const [aluno, setAluno] = useState<Aluno>(new Aluno)
     const [valorInput, setValorInput] = useState<ValorInput>({
         nome: "",
@@ -43,21 +46,20 @@ export default function PerfilAluno() {
     })
 
     // PEGANDO ID DO ALUNO QUE VEIO DA TELA LISTA ALUNOS
-    const searchParams = useSearchParams()
-    const id = searchParams.get('id')
+    const searchParams = useSearchParams();
+    const id = searchParams.get('id');
 
 useEffect(() => {
     async function fetchData() {
         if (id) {
             try {
-                const alunoBuscado = await alunoDAO.getOne(id) // estou buscando os dados do aluno pelo id dele
-
-                const db = getFirestore() // pega a instancia do firestore para fazer as consultas
-                const turmaAlunoQuery = query(collection(db, "turmaAluno"), where("idAluno", "==", id)) //estou montando a seleção para buscar no bd todos os documentos da coleção turmaAluno onde o idAluno é igual ao id do aluno que eu busquei
-                const turmaAlunoSnapshot = await getDocs(turmaAlunoQuery) // executa a consulta e retorna 
-                let idTurma = "" // variavel que vai guardar o id da turma
-                turmaAlunoSnapshot.forEach((doc) => { // o for each vai percorrer todos os documentos que vieram da consulta
-                    idTurma = doc.data().idTurma // aqui eu pego o id da turma do aluno
+                const alunoBuscado = await alunoDAO.getOne(id)
+                const db = getFirestore()
+                const turmaAlunoQuery = query(collection(db, "turmaAluno"), where("idAluno", "==", id))
+                const turmaAlunoSnapshot = await getDocs(turmaAlunoQuery)
+                let idTurma = ""
+                turmaAlunoSnapshot.forEach((doc) => {
+                    idTurma = doc.data().idTurma
                 })
 
                 setAluno({ ...alunoBuscado, idTurma })
@@ -76,6 +78,10 @@ useEffect(() => {
 
                 const registros = await registroVidaAlunoDAO.getAll(id)
                 setRegistros(registros)
+
+                // Buscar comentários do conselho de classe para o aluno
+                const comentarios = await registroProfessorDescricaoDAO.getByAluno(id)
+                setComentariosConselho(comentarios)
             } catch (e: any) {
                 console.log(e.message)
             }
@@ -186,6 +192,7 @@ useEffect(() => {
             const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
                 day: '2-digit', month: '2-digit', year: 'numeric'
             }).format(registro.data);
+            doc.setTextColor(255, 0, 0); // vermelho para eventos
             doc.setFont('helvetica', 'bold');
             doc.text(`${dataFormatada}`, 20, yPosition);
             doc.setFont('helvetica', 'normal');
@@ -207,21 +214,56 @@ useEffect(() => {
             }
         });
 
-        // Seção do Conselho de Classe (comentada para futura implementação)
-        // yPosition += 10;
-        // doc.setFontSize(16);
-        // doc.text('Conselho de Classe', pageWidth / 2, yPosition, { align: 'center' });
-        // doc.setFontSize(12);
-        // yPosition += 10;
-        // doc.text('Nenhum registro de conselho disponível.', 30, yPosition);
+        // Seção do Conselho de Classe
+        yPosition += 10;
+        doc.setTextColor(0, 128, 0); // verde para conselhos
+        doc.setFontSize(16);
+        doc.text('CONSELHO DE CLASSE', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFontSize(12);
+        yPosition += 10;
+        if (comentariosConselho.length === 0) {
+            doc.text('Nenhum registro de conselho disponível.', 30, yPosition);
+            yPosition += 10;
+        } else {
+            comentariosConselho.forEach(comentario => {
+                doc.text(`Professor: ${comentario.registroProfessor?.usuario?.nome || ''}`, 30, yPosition);
+                yPosition += 7;
+                doc.text(comentario.observacao, 35, yPosition);
+                yPosition += 10;
+                if (yPosition > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+            });
+        }
+        doc.setTextColor(0, 0, 0); // volta para preto
 
         doc.save('relatorio-aluno-com-registros.pdf');
     }
 
-
+    // Definir breadcrumbs dinâmicos
+    const idTurma = searchParams.get("idTurma");
+    const idCurso = searchParams.get("idCurso");
+    let breadcrumbItems: BreadcrumbItem[];
+    if (idTurma && idCurso) {
+        breadcrumbItems = [
+            { label: "Cursos", href: "/listas/listaCursos" },
+            { label: "Turmas", href: `/listas/listaTurmas?id=${idCurso}` },
+            { label: "Alunos", href: `/listas/listaAlunos?idTurma=${idTurma}&idCurso=${idCurso}` },
+            { label: aluno.nome || "Perfil do Aluno", isActive: true }
+        ];
+    } else {
+        breadcrumbItems = [
+            { label: "Alunos", href: "/listas/listaTodosAlunos" },
+            { label: aluno.nome || "Perfil do Aluno", isActive: true }
+        ];
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 flex flex-col items-center py-10">
+        <div className="min-h-screen bg-white flex flex-col items-center py-10">
+            <div className="w-full max-w-2xl mb-2">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
             <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-2xl border border-blue-100 animate-fade-in flex flex-col items-center">
                 <h1 className="text-4xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
                     <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">👤</span>

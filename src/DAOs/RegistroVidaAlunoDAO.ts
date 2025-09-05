@@ -61,6 +61,29 @@ class RegistroVidaAlunoDAO {
         });
     }
 
+    // GET ALL BY ALUNO AND TURMA
+    async getAllByAlunoAndTurma(idAluno: string, idTurma: string): Promise<RegistroVidaAluno[]> {
+        const registrosSnapshot = await getDocs(
+            query(
+                collection(db, "registroVidaAluno"),
+                where("idAluno", "==", idAluno),
+                where("idTurma", "==", idTurma)
+            )
+        );
+        return registrosSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                tipoRegistro: data.tipoRegistro,
+                descricao: data.descricao,
+                idAluno: data.idAluno,
+                idTurma: data.idTurma,
+                nomeProfessor: data.nomeProfessor,
+                data: data.data.toDate(),
+            } as RegistroVidaAluno;
+        });
+    }
+
     // UPDATE
     async update(registro: RegistroVidaAluno, id: string) {
         try {

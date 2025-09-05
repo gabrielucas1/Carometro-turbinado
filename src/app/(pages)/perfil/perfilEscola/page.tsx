@@ -6,6 +6,7 @@ import { UserContext } from "@/contexts/UserContext"; // Importar o contexto do 
 import TipoUsuario from "@/model/Enums/TipoUsuario"; // Importar os tipos de usuário
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useContext, useEffect, useState } from "react"
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
 
 export default function PerfilEscola() {
     const router = useRouter();
@@ -150,9 +151,16 @@ export default function PerfilEscola() {
         }
     }
 
+    // Definir breadcrumbs
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Escolas", href: "/listas/listaEscolas" },
+        { label: escola.nome || "Perfil da Escola", isActive: true }
+    ];
+
     return (
         <div className="w-full flex items-center flex-col px-4 py-10 min-h-screen bg-white">
             <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-xl border border-blue-100 animate-fade-in flex flex-col items-center">
+                <Breadcrumbs items={breadcrumbItems} />
                 <h1 className="text-4xl font-extrabold text-blue-700 mb-8 text-center flex items-center justify-center gap-2">
                     <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">🏫</span>
                     Perfil da Escola

@@ -15,6 +15,7 @@ import jsPDF from "jspdf"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
 import registroVidaAlunoDAO from "@/DAOs/RegistroVidaAlunoDAO"
 import TipoRegistro from "@/model/Enums/TipoRegistro"
+import Breadcrumbs, { BreadcrumbItem, createHierarchicalBreadcrumbs } from "@/components/Breadcrumbs"
 
 export default function PerfilTurma() {
     const [turma, setTurma] = useState<Turma>(new Turma)
@@ -31,7 +32,7 @@ export default function PerfilTurma() {
     const [revisaoGeral, setRevisaoGeral] = useState("")
     const router = useRouter()
     const [nome, setNome] = useState("")
-    const { usuarioLogado, atualizarUsuarioLogado } = useContext(UserContext);
+    const { usuarioLogado } = useContext(UserContext);
 
     //[key: string]: string DEFINE QUE O OBJETO TERÁ APENAS STRINGS
     const [observacoes, setObservacoes] = useState<{ [key: string]: string }>({})
@@ -44,6 +45,7 @@ export default function PerfilTurma() {
         if (id) {
             // Buscar a turma
             turmaDAO.getOne(id).then((turmaBuscada) => {
+                console.log("Turma buscada:", turmaBuscada);
                 setTurma(turmaBuscada);
                 setNome(turmaBuscada.nome);
             }).catch((e) => {
@@ -52,21 +54,26 @@ export default function PerfilTurma() {
 
             // Buscar os alunos da turma
             turmaAlunoDAO.getAlunos(id).then(async (alunos) => {
+                console.log("Alunos encontrados:", alunos);
                 setAlunos(alunos);
+                const registrosTemp: RegistroVidaAluno[] = [];
                 for (const aluno of alunos) {
                     try {
-                        const registros: RegistroVidaAluno[] = await registroVidaAlunoDAO.getAll(aluno.id); // Chame o método passando o ID do aluno
-                        setRegistrosAluno(registros) // Adiciona o registro ao array temporário
+                        const registros: RegistroVidaAluno[] = await registroVidaAlunoDAO.getAllByAlunoAndTurma(aluno.id, id);
+                        console.log(`Registros do aluno ${aluno.id} na turma ${id}:`, registros);
+                        registrosTemp.push(...registros);
                     } catch (e: any) {
-                        console.log(`Erro ao buscar registro para o aluno ${aluno.id}: ${e.message}`);
+                        console.log(`Erro ao buscar registro para o aluno ${aluno.id} na turma ${id}: ${e.message}`);
                     }
                 }
+                setRegistrosAluno(registrosTemp);
             }).catch((e) => {
                 console.log(e.message);
             });
 
             // Buscar os registros de professor da turma
             registroProfessorTurmaDAO.getAll().then((registros) => {
+                console.log("Registros de professor da turma:", registros);
                 setRegistrosTurma(registros);
             }).catch((e) => {
                 console.log(e.message);
@@ -155,128 +162,135 @@ export default function PerfilTurma() {
     }
 
     async function gerarRelatorio() {
-        const doc = new jsPDF();
+        try {
+            console.log("Iniciando geração do relatório...");
+            console.log("Registros do aluno:", registrosAluno);
+            console.log("Registros da turma:", registrosTurma);
 
-        // Dimensões da página (em milímetros)
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
+            const doc = new jsPDF();
 
-        doc.setLineWidth(1.1);
+            // Dimensões da página (em milímetros)
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
 
-        // Desenhar um retângulo ao redor da página (x, y, largura, altura)
-        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);  // Ajustar as margens de acordo com a necessidade
+            doc.setLineWidth(1.1);
 
-        const lineHeight = 10;
-        let yPosition = 20;
-        let xPosition = 10;
+            // Desenhar um retângulo ao redor da página (x, y, largura, altura)
+            doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
 
-        doc.text(`Relatórios da turma: ${turma.nome}`, xPosition, yPosition);
+            const lineHeight = 10;
+            let yPosition = 20;
+            let xPosition = 10;
 
-        if (registrosTurma.length === 0) {
-            doc.text('Nenhum registro encontrado.', xPosition, 30);
+            doc.text(`Relatórios da turma: ${turma.nome || "Nome não disponível"}`, xPosition, yPosition);
+            yPosition += lineHeight * 2;
+
+            // Adicionar registros da turma primeiro
+            if (registrosTurma.filter(r => r.turma.id === turma.id).length > 0) {
+                doc.text('=== REGISTROS DA TURMA ===', xPosition, yPosition);
+                yPosition += lineHeight;
+
+                registrosTurma.filter(r => r.turma.id === turma.id).forEach((registro) => {
+                    // Verificar se há espaço suficiente
+                    if (yPosition + lineHeight * 4 > pageHeight - 10) {
+                        doc.addPage();
+                        doc.setLineWidth(1.1);
+                        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+                        yPosition = 20;
+                    }
+
+                    doc.text(`Tipo: ${registro.tipoRegistro || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Professor: ${registro.usuario?.nome || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Descrição: ${registro.revisaoGeral || "Não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    if (registro.disciplina) {
+                        doc.text(`Disciplina: ${registro.disciplina}`, xPosition, yPosition);
+                        yPosition += lineHeight;
+                    }
+                    if (registro.periodo) {
+                        doc.text(`Período: ${registro.periodo}`, xPosition, yPosition);
+                        yPosition += lineHeight;
+                    }
+                    doc.text('-----------------------------------', xPosition, yPosition);
+                    yPosition += lineHeight * 1.5;
+                });
+            }
+
+            // Adicionar registros dos alunos
+            if (registrosAluno.length > 0) {
+                yPosition += lineHeight;
+                doc.text('=== REGISTROS DOS ALUNOS ===', xPosition, yPosition);
+                yPosition += lineHeight;
+
+                for (const registro of registrosAluno) {
+                    // Verificar se há espaço suficiente
+                    if (yPosition + lineHeight * 5 > pageHeight - 10) {
+                        doc.addPage();
+                        doc.setLineWidth(1.1);
+                        doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
+                        yPosition = 20;
+                    }
+
+                    let dataFormatada = "Data não disponível";
+                    try {
+                        if (registro.data) {
+                            // Tentar diferentes formatos de data
+                            const data = typeof registro.data === 'string' ? new Date(registro.data) : registro.data;
+                            if (data instanceof Date && !isNaN(data.getTime())) {
+                                dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                }).format(data);
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Erro ao formatar data:", e);
+                    }
+
+                    doc.text(`Data: ${dataFormatada}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Tipo: ${registro.tipoRegistro || "Tipo não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Professor: ${registro.nomeProfessor || "Nome não especificado"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`Descrição: ${registro.descricao || "Descrição não especificada"}`, xPosition, yPosition);
+                    yPosition += lineHeight;
+                    doc.text('-----------------------------------', xPosition, yPosition);
+                    yPosition += lineHeight * 1.5;
+                }
+            }
+
+            if (registrosTurma.filter(r => r.turma.id === turma.id).length === 0 && registrosAluno.length === 0) {
+                doc.text('Nenhum registro encontrado para esta turma.', xPosition, yPosition);
+            }
+
+            // Salvar o PDF
+            doc.save(`relatorio-turma-${turma.nome || 'sem-nome'}.pdf`);
+            console.log("Relatório gerado com sucesso!");
+
+        } catch (error) {
+            console.error("Erro ao gerar relatório:", error);
+            alert("Erro ao gerar relatório. Verifique o console para mais detalhes.");
         }
-
-        const blocoRegistroAltura = lineHeight + lineHeight * 1.5 + lineHeight * 4 + lineHeight + 6; // altura total do bloco do registro
-        registrosTurma.filter(r => r.turma.id === turma.id).forEach((registro) => {
-            const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            }).format(registro.data);
-
-            // Se não houver espaço suficiente para o bloco, adiciona nova página
-            if (yPosition + blocoRegistroAltura > pageHeight - 10) {
-                doc.addPage();
-                doc.setLineWidth(1.1);
-                doc.rect(5, 5, pageWidth - 10, pageHeight - 10);
-                yPosition = 20;
-                doc.text(`Relatórios da turma: ${turma.nome}`, xPosition, yPosition);
-                yPosition += lineHeight;
-            }
-
-            yPosition += lineHeight;
-            doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-            yPosition += lineHeight * 1.5;
-            doc.text(`Professor: ${registro.usuario?.nome || "(não informado)"}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Disciplina: ${registro.disciplina || ""}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Período: ${registro.periodo || ""}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Revisão Geral: ${registro.revisaoGeral || ""}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`======================================`, xPosition, yPosition);
-            yPosition += lineHeight + 6;
-        })
-
-        for (const aluno of alunos) {
-            const response = await fetch(aluno.fotoUrl);
-
-            // IMG.SRC SÓ ACEITA TIPO BLOB, POR ISSO A CONVERSÃO
-            const blob = await response.blob();
-            const img = new Image();
-            img.src = URL.createObjectURL(blob);
-
-
-
-            if (yPosition > doc.internal.pageSize.getHeight() - 20) { // Checa se a posição excede a altura da página
-                doc.addPage(); // Adiciona nova página
-                yPosition = 20; // Reseta a posição vertical
-            }
-
-            doc.addImage(img, 'JPEG', xPosition, yPosition -10, 40, 50);
-
-            xPosition += 46;
-
-            doc.text(`Nome: ${aluno.nome}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Data de Nascimento: ${aluno.dataNascimento}`, xPosition, yPosition);
-            yPosition += lineHeight;
-            doc.text(`Cidade: ${aluno.cidade}`, xPosition, yPosition);
-
-            xPosition = 10;
-
-            yPosition += lineHeight * 3;
-
-            doc.text('Registros da Vida do Aluno:', xPosition, yPosition);
-            yPosition += lineHeight + 6;
-
-            if (registrosAluno.length === 0) {
-                doc.text('Nenhum registro encontrado.', xPosition, yPosition);
-            }
-
-            const professoresNoRepeat: string[] = []; // Mover a declaração para fora do loop
-            for (const registro of registrosAluno) {
-                const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }).format(registro.data);
-
-                doc.text(`========== ${dataFormatada} ==========`, xPosition, yPosition);
-                yPosition += lineHeight * 1.5;
-                doc.text(`Tipo: ${registro.tipoRegistro}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`Professor ${registro.nomeProfessor}: ${registro.descricao}`, xPosition, yPosition);
-                yPosition += lineHeight;
-                doc.text(`======================================`, xPosition, yPosition);
-                yPosition += lineHeight + 6;
-            }
-        }
-
-
-        // Salvar o PDF
-        doc.save('relatorio-alunos-com-registros.pdf');
     }
 
-
-
-
+    // Breadcrumbs ajustado para navegação correta
+    const idCurso = turma.curso?.id ?? "";
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Cursos", href: "/listas/listaCursos" },
+        turma.curso && { label: turma.curso.nome ?? "ADS", isActive: false },
+        { label: "Turmas", href: `/listas/listaTurmas?idCurso=${idCurso}` },
+        { label: turma.nome ?? "Turma", isActive: true }
+    ].filter(Boolean) as BreadcrumbItem[];
 
     return (
         <>
             <div className="min-h-screen bg-white flex flex-col items-center py-10">
                 <div className="w-full max-w-3xl bg-blue-50 rounded-2xl shadow-lg p-8 mb-10 flex flex-col items-center">
+                    <Breadcrumbs items={breadcrumbItems} />
                     <h1 className="text-4xl font-extrabold text-blue-700 mb-2">Perfil da Turma</h1>
                     <div className="text-2xl text-gray-700 font-semibold mb-2">{turma.nome}</div>
                 </div>

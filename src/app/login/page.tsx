@@ -47,7 +47,7 @@ export default function Login() {
         switch (usuario.tipoUsuario) {
           case TipoUsuario.ADMGERAL:
             console.log("PASSANDO!!!!!");
-            router.push("/telaInicial/telaADM");
+            router.push("/telaInicial/telaADMGeral");
             break;
           case TipoUsuario.ADMESCOLA:
             router.push("/telaInicial/telaADMEscola");

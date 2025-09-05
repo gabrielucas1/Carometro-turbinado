@@ -8,6 +8,7 @@ import cursoDAO from "@/DAOs/CursoDAO";
 import Aluno from "@/model/Aluno";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Breadcrumbs, {BreadcrumbItem} from "@/components/Breadcrumbs"; 
 
 type AlunoComInfo = Aluno & {
     nomeTurma?: string;
@@ -15,9 +16,14 @@ type AlunoComInfo = Aluno & {
     nomeEscola?: string;
 };
 
+
 export default function ListaTodosAlunos() {
     const [listaAlunos, setListaAlunos] = useState<AlunoComInfo[]>([]);
     const [carregando, setCarregando] = useState(true);
+
+    const breadcrumbItems : BreadcrumbItem[] = [
+    {label:"Alunos", isActive: true},
+];
 
     useEffect(() => {
         setCarregando(true);
@@ -41,12 +47,12 @@ export default function ListaTodosAlunos() {
         buscarTodosAlunos();
     }, []);
 
-    console.log("ListaAlunos para renderizar:", listaAlunos);
-    console.log(localStorage.getItem("usuarioLogado"));
-    console.log(localStorage.getItem("usuario"));
 
     return (
-        <>
+        <div className="flex flex-col items-center w-full">
+            <div className="w-full max-w-3xl mt-6">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
             <h1 className="text-2xl mt-6 mb-4 text-center">Todos os Alunos</h1>
             {carregando ? (
                 <p className="text-center">Carregando alunos...</p>
@@ -63,6 +69,9 @@ export default function ListaTodosAlunos() {
                     )}
                 </div>
             )}
-        </>
+        </div>
     );
 }
+
+
+        

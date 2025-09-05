@@ -1,6 +1,10 @@
 "use client"
 
 import { ChangeEvent, useState } from "react";
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs";
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Importar Aluno", isActive: true },
+    ];
 
 interface Student {
     nome: string;
@@ -55,7 +59,10 @@ export default function ImportarAluno() {
     }
 
     return (
-        <>
+        <div className="flex flex-col items-center w-full">
+            <div className="w-full max-w-3xl mt-6">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
             <h1 className="text-xl mt-4">Importar Aluno</h1>
             <div className="fixed bottom-4 flex flex-col items-center">
                 {student && (
@@ -82,9 +89,7 @@ export default function ImportarAluno() {
                 </button>
 
                 {fileName && <p className="mt-2">Arquivo enviado: {fileName}</p>}
-
-                
             </div>
-        </>
+        </div>
     );
 }

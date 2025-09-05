@@ -7,6 +7,7 @@ import TipoUsuario from "@/model/Enums/TipoUsuario";
 import Usuario from "@/model/Usuario";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs";
 
 export default function ListaFuncionarios() {
     const router = useRouter();
@@ -14,6 +15,10 @@ export default function ListaFuncionarios() {
     const [carregando, setCarregando] = useState(true);
 
     const { usuarioLogado } = useContext(UserContext);
+
+    const breadcrumbItems: BreadcrumbItem[] = [
+        { label: "Equipe", isActive: true },
+    ];
 
     useEffect(() => {
         setCarregando(true);
@@ -34,6 +39,9 @@ export default function ListaFuncionarios() {
 
     return (
         <div className="flex flex-col items-center w-full">
+                        <div className="w-full max-w-3xl mt-6">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
             <h1 className="mt-6 text-2xl">Funcionários</h1>
             {carregando ? (
                 <p>Carregando funcionários...</p>

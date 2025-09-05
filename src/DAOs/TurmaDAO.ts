@@ -36,6 +36,7 @@ class TurmaDAO {
             turma.ano = data.ano
             turma.escola = turma.curso.escola // Adiciona o campo escola
             turma.fotoUrl = data.fotoUrl || ""
+            console.log("[DEBUG] TurmaDAO.getOne - turma:", turma);
         } else {
             throw new Error('Erro ao buscar turma!')
         }
@@ -62,6 +63,8 @@ class TurmaDAO {
     
             turmas.push(turma);
         }
+        console.log(`QuerySnapshot: ${JSON.stringify(querySnapshot.docs.map(doc => doc.data()))}`);
+        console.log(`Turmas: ${JSON.stringify(turmas)}`);
     
         return turmas;
     }

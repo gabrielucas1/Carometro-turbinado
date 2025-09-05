@@ -58,9 +58,7 @@ export default function OutrasPaginasLayout({
                                 <NavButton href="/listas/listaCursos" icon={Book} text='Cursos' ariaLabel='Ver Cursos'/>
                                 {/* <NavButton href="/telaInicial/telaFuncionario" icon={ ScrollText } text='Turmas' ariaLabel='Ver Turmas'/>
                                 <NavButton href="/telaInicial/telaADMEscola" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" /> */}
-
-
-
+                                <NavButton href="/listas/listaConselho" icon={ScrollText} text='Conselho' ariaLabel='Conselho'/>
                             </>
                         )}
                     </div>

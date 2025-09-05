@@ -4,7 +4,13 @@ import { useRouter } from "next/navigation";
 import TurmaAluno from "@/model/TurmaAluno";
 import Escola from "@/model/Escola";
 
-export default function AlunoCard({ aluno, onDelete }: { aluno: Aluno; onDelete?: () => void}) {
+interface AlunoCardProps {
+    aluno: Aluno;
+    onClick?: () => void; // nova prop
+    onDelete?: () => void
+}
+
+export default function AlunoCard({ aluno, onClick, onDelete }: AlunoCardProps) {
     const router = useRouter()
 
     console.log("ALUNO1:", aluno);
@@ -39,7 +45,7 @@ export default function AlunoCard({ aluno, onDelete }: { aluno: Aluno; onDelete?
     }
 
     return (
-        <div className="shadow-sm border-gray-900 border-1 bg-gray-50 rounded-lg w-96 h-32 p-3 flex hover:w-[25rem] transition-all relative">
+        <div className="shadow-sm border-gray-900 border-1 bg-gray-50 rounded-lg w-96 h-32 p-3 flex hover:w-[25rem] transition-all relative" onClick={onClick}>
             {/* Botões de ação - sempre visíveis */}
             <div className="absolute top-2 right-2 flex gap-1">
                 <button

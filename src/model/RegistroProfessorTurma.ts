@@ -1,5 +1,6 @@
 import Turma from "./Turma"
 import Usuario from "./Usuario"
+import ConselhoClasse from "./ConselhoClasse"
 
 export default class RegistroProfessorTurma{
     id: string
@@ -10,6 +11,7 @@ export default class RegistroProfessorTurma{
     tipoRegistro: string
     revisaoGeral: String
     data: Date
+    conselhoClasse: ConselhoClasse
 
     constructor() {
         this.id = ""
@@ -20,5 +22,6 @@ export default class RegistroProfessorTurma{
         this.tipoRegistro = ""
         this.revisaoGeral = ""
         this.data = new Date()
+        this.conselhoClasse = new ConselhoClasse()
     }
 }
