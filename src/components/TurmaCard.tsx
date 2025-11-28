@@ -6,24 +6,22 @@ export default function TurmaCard({turma, onDelete} : {turma: Turma; onDelete?: 
     const router = useRouter()
 
     function navegarAlunos(idTurma: string) {
+        console.log('[TurmaCard] Navegando para lista de alunos da turma:', idTurma);
         router.push(`/listas/listaAlunos?idTurma=${idTurma}`)
     }
 
     function editarTurma(e: React.MouseEvent) {
         e.stopPropagation();
-        router.push(`/editar/editarTurma?id=${turma.id}`)
+        router.push(`/editar/editarTurma?id=${turma.idTurma}`)
     }
 
     async function excluirTurma(e: React.MouseEvent) {
         e.stopPropagation();
-        
         const confirmacao = confirm(`Tem certeza que deseja excluir a turma "${turma.nome}"?`);
-        
         if (confirmacao) {
             try {
-                await turmaDAO.deletar(turma.id);
+                await turmaDAO.deletar(turma.idTurma);
                 alert("Turma excluída com sucesso!");
-                
                 if (onDelete) {
                     onDelete();
                 }
@@ -56,7 +54,10 @@ return(
             {/* Área clicável para navegar aos alunos */}
             <div 
                 className="flex w-full cursor-pointer" 
-                onClick={() => navegarAlunos(turma.id)}
+                onClick={() => {
+                    console.log('[TurmaCard] Clique para navegar alunos, turma:', turma);
+                    navegarAlunos(turma.idTurma);
+                }}
             >
                 <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg overflow-hidden">
                     {turma.fotoUrl ? (

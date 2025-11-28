@@ -12,6 +12,7 @@ export default function editAluno() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const [carregando, setCarregando] = useState(true);
+    const [alunoOriginal, setAlunoOriginal] = useState<Aluno | null>(null);
 
     const [valorInput, setValorInput] = useState({
         nome: "",
@@ -33,6 +34,7 @@ export default function editAluno() {
         if (id) {
             alunoDAO.getOne(id)
                 .then((aluno) => {
+                    setAlunoOriginal(aluno);
                     setValorInput({
                         nome: aluno.nome,
                         dataNascimento: aluno.dataNascimento,
@@ -77,6 +79,11 @@ export default function editAluno() {
         }
 
         try {
+            if (!alunoOriginal) {
+                alert("Dados do aluno não carregados!");
+                return;
+            }
+
             const aluno = new Aluno();
             aluno.id = id;
             aluno.nome = valorInput.nome;
@@ -89,6 +96,9 @@ export default function editAluno() {
             aluno.estado = valorInput.estado;
             aluno.cidade = valorInput.cidade;
             aluno.complemento = valorInput.complemento;
+            // Preservar campos importantes do aluno original
+            aluno.idTurma = alunoOriginal.idTurma;
+            aluno.idEscola = alunoOriginal.idEscola;
 
             // Se uma nova foto foi selecionada, fazer upload
             if (valorInput.foto) {

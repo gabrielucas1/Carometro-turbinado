@@ -14,7 +14,11 @@ class RegistroProfessorTurmaDAO {
                 },
                 disciplina: registro.disciplina,
                 periodo: registro.periodo,
-                idTurma: registro.turma.id,
+                idTurma: registro.turma.idTurma, // Corrigido: usando idTurma em vez de idCurso
+                turma: {
+                    id: registro.turma.idTurma,
+                    nome: registro.turma.nome || ""
+                },
                 revisaoGeral: registro.revisaoGeral,
                 data: Timestamp.fromDate(registro.data)
             });
@@ -39,7 +43,7 @@ class RegistroProfessorTurmaDAO {
             registro.usuario = data.usuario || { id: "", nome: "", email: "" };
             registro.disciplina = data.disciplina;
             registro.periodo = data.periodo;
-            registro.turma.id = data.idTurma;
+            registro.turma.idCurso = data.idTurma;
             registro.revisaoGeral = data.revisaoGeral;
             registro.data = data.data.toDate();
         } else {
@@ -51,29 +55,51 @@ class RegistroProfessorTurmaDAO {
 
     // GETALL
     async getAll(): Promise<RegistroProfessorTurma[]> {
-        const querySnapshot = await getDocs(collection(db, "registroProfessorTurma"));
-        const registros: RegistroProfessorTurma[] = [];
+        try {
+            console.log("[DEBUG] RegistroProfessorTurmaDAO.getAll - Iniciando busca de registros");
+            const querySnapshot = await getDocs(collection(db, "registroProfessorTurma"));
+            const registros: RegistroProfessorTurma[] = [];
 
-        for (const docItem of querySnapshot.docs) {
-            const data = docItem.data();
-            const registro = new RegistroProfessorTurma();
+            console.log("[DEBUG] RegistroProfessorTurmaDAO.getAll - Total de registros encontrados:", querySnapshot.docs.length);
 
-            registro.id = docItem.id;
-            registro.usuario = data.usuario || { id: "", nome: "", email: "" };
-            registro.disciplina = data.disciplina;
-            registro.periodo = data.periodo;
-            registro.turma.id = data.idTurma;
-            registro.revisaoGeral = data.revisaoGeral;
-            registro.data = data.data.toDate();
-            registros.push(registro);
+            for (const docItem of querySnapshot.docs) {
+                const data = docItem.data();
+                console.log("[DEBUG] RegistroProfessorTurmaDAO.getAll - Dados do registro:", data);
+                
+                const registro = new RegistroProfessorTurma();
+                registro.id = docItem.id;
+                registro.usuario = data.usuario || { id: "", nome: "", email: "" };
+                registro.disciplina = data.disciplina || "";
+                registro.periodo = data.periodo || "";
+                
+                // Corrigido: usando campo turma corretamente
+                if (data.turma) {
+                    registro.turma.idTurma = data.turma.id || data.idTurma || "";
+                    registro.turma.nome = data.turma.nome || "";
+                } else {
+                    registro.turma.idTurma = data.idTurma || "";
+                }
+                
+                registro.revisaoGeral = data.revisaoGeral || "";
+                registro.data = data.data ? data.data.toDate() : new Date();
+                
+                console.log("[DEBUG] RegistroProfessorTurmaDAO.getAll - Registro processado:", registro);
+                registros.push(registro);
+            }
+
+            return registros;
+        } catch (error: unknown) {
+            console.error("[ERROR] RegistroProfessorTurmaDAO.getAll - Erro ao buscar registros:", error);
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Erro ao buscar registros: ${message}`);
         }
-
-        return registros;
     }
 
     // UPDATE
     async update(registro: RegistroProfessorTurma, id: string) {
         try {
+            console.log("[DEBUG] RegistroProfessorTurmaDAO.update - Atualizando registro:", { id, registro });
+            
             await setDoc(doc(db, "registroProfessorTurma", id), {
                 usuario: {
                     id: registro.usuario.id,
@@ -82,13 +108,19 @@ class RegistroProfessorTurmaDAO {
                 },
                 disciplina: registro.disciplina,
                 periodo: registro.periodo,
-                idTurma: registro.turma.id,
+                idTurma: registro.turma.idTurma, // Corrigido: usando idTurma em vez de idCurso
+                turma: {
+                    id: registro.turma.idTurma,
+                    nome: registro.turma.nome || ""
+                },
                 revisaoGeral: registro.revisaoGeral,
                 data: Timestamp.fromDate(registro.data)
             });
-            console.log("Registro do professor na turma atualizado com sucesso!");
-        } catch (e) {
-            throw new Error("Erro ao atualizar registro do professor na turma!");
+            console.log("[DEBUG] RegistroProfessorTurmaDAO.update - Registro atualizado com sucesso!");
+        } catch (error: unknown) {
+            console.error("[ERROR] RegistroProfessorTurmaDAO.update - Erro ao atualizar:", error);
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Erro ao atualizar registro do professor na turma: ${message}`);
         }
     }
 

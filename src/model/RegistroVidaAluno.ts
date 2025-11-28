@@ -6,6 +6,7 @@ export default class RegistroVidaAluno {
     tipoRegistro: TipoRegistro;
     descricao: string;
     idAluno: string;
+    idTurma: string; // Adicionar idTurma
     nomeProfessor: string
     data: Date;
 
@@ -14,6 +15,7 @@ export default class RegistroVidaAluno {
         this.tipoRegistro = TipoRegistro.VAZIO
         this.descricao = ""
         this.idAluno = ""
+        this.idTurma = "" // Inicializar idTurma
         this.nomeProfessor = ""
         this.data = new Date
     }

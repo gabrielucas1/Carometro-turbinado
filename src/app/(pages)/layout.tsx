@@ -37,15 +37,15 @@ export default function OutrasPaginasLayout({
 
                         {/* Navegação ADMESCOLA */}
                         {usuarioLogado.tipoUsuario === TipoUsuario.ADMESCOLA && (
-                            <>  
+                            <>
                                 <NavButton href="/telaInicial/telaADMEscola" icon={House} text="Início" ariaLabel="Ir para o início do ADMGERAL" />
                                 <NavButton href="/listas/listaTodosAlunos" icon={Student} text="Alunos" ariaLabel='Alunos'/>
                                 <NavButton href="/importarAluno" icon={DownloadSimple} text="Importar" ariaLabel='Importar Aluno'/>
                                 <NavButton href="/listas/listaCursos" icon={Book} text='Cursos' ariaLabel='Ver Cursos'/>
                                 <NavButton href="/listas/listaEscolas" icon={GraduationCap} text="Escolas" ariaLabel='Ver Escolas'/>
+                                <NavButton href="/transferencias" icon={UsersThree} text='Transferir' ariaLabel='Transferir alunos'/>
+                                <NavButton href="/listas/listaConselho" icon={ScrollText} text='Conselho' ariaLabel='Conselho'/>
                                 <NavButton href="/listas/listaFuncionarios" icon={UsersThree} text="Equipe" ariaLabel='Ver Funcionários'/>
-
-
                             </>
                         )}
 

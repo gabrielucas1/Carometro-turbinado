@@ -11,6 +11,7 @@ class RegistroVidaAlunoDAO {
                 tipoRegistro: registro.tipoRegistro,
                 descricao: registro.descricao,
                 idAluno: registro.idAluno,
+                idTurma: registro.idTurma, // Adicionar idTurma
                 nomeProfessor: registro.nomeProfessor,
                 data: Timestamp.fromDate(registro.data),
             });
@@ -91,6 +92,7 @@ class RegistroVidaAlunoDAO {
                 tipoRegistro: registro.tipoRegistro,
                 descricao: registro.descricao,
                 idAluno: registro.idAluno,
+                idTurma: registro.idTurma, // Adicionar idTurma
                 nomeProfessor: registro.nomeProfessor,
                 data: Timestamp.fromDate(registro.data),
             });

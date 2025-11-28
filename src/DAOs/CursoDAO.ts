@@ -29,8 +29,9 @@ class CursoDAO {
         if (querySnapshot.exists()) {
             const data = querySnapshot.data()
             console.log("[CursoDAO.getOne] Dados do curso encontrados:", data); // Log para verificar os dados do curso
-            curso.id = querySnapshot.id
-            curso.nome = data.nome
+            curso.id = querySnapshot.id;
+            curso.idEscola = data.idEscola;
+            curso.nome = data.nome;
             curso.fotoUrl = data.fotoUrl || "";
             if(data.idEscola && typeof data.idEscola === "string") {
                 curso.escola = await escolaDAO.getOne(data.idEscola)
@@ -39,7 +40,7 @@ class CursoDAO {
                 console.error("[CursoDAO.getOne] Campo idEscola não encontrado no curso!", data);
                 throw new Error("Erro ao buscar a escola associada ao curso!");
             }
-            curso.turno = data.turno
+            curso.turno = data.turno;
         } else {
             console.error(`[CursoDAO.getOne] Curso com id '${id}' não encontrado!`);
             throw new Error('Erro ao buscar curso!')
@@ -68,9 +69,10 @@ class CursoDAO {
 
             const curso: Curso = new Curso();
             curso.id = doc.id;
+            curso.idEscola = data.idEscola;
             curso.nome = data.nome;
             curso.turno = data.turno;
-            curso.fotoUrl = data.fotoUrl; // fiz certo?
+            curso.fotoUrl = data.fotoUrl;
 
             if (data.idEscola && escolasMap[data.idEscola]) {
                 curso.escola = escolasMap[data.idEscola]; // Usa o mapa de escolas

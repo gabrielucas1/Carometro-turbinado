@@ -47,6 +47,38 @@ export default function ListaTodosAlunos() {
         buscarTodosAlunos();
     }, []);
 
+    // Adicionar listener para recarregar dados quando a página volta ao foco
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!document.hidden && !carregando) {
+                // Página voltou ao foco, recarregar dados
+                async function recarregarTodos() {
+                    setCarregando(true);
+                    try {
+                        const admEscola = JSON.parse(localStorage.getItem("usuario") || "null");
+                        const idEscolaAdm = admEscola?.idEscola?.toString().trim();
+                        const alunos = await alunoDAO.getAll();
+                        const alunosFiltrados = alunos.filter(aluno => aluno.idEscola?.toString().trim() === idEscolaAdm);
+                        setListaAlunos(alunosFiltrados);
+                    } catch (e: any) {
+                        console.log("Erro ao recarregar alunos:", e.message);
+                    } finally {
+                        setCarregando(false);
+                    }
+                }
+                recarregarTodos();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [carregando]);
+
+    // Ordenar a lista de alunos em ordem alfabética e adicionar identificadores únicos
+    const alunosOrdenados = listaAlunos.sort((a, b) => a.nome.localeCompare(b.nome));
 
     return (
         <div className="flex flex-col items-center w-full">
@@ -57,12 +89,13 @@ export default function ListaTodosAlunos() {
             {carregando ? (
                 <p className="text-center">Carregando alunos...</p>
             ) : (
-                <div className="flex flex-col py-6 gap-4 items-center">
-                    {listaAlunos.length === 0 ? (
+                <div className="flex flex-col py-6 gap-4 items-center max-h-[80vh] overflow-y-auto">
+                    {alunosOrdenados.length === 0 ? (
                         <p className="text-lg text-gray-500">Nenhum aluno cadastrado.</p>
                     ) : (
-                        listaAlunos.map((aluno) => (
-                            <div key={aluno.id} className="w-full max-w-xl">
+                        alunosOrdenados.map((aluno, index) => (
+                            <div key={aluno.id} className="flex items-center justify-between w-full max-w-lg">
+                                <span className="font-bold mr-2">{index + 1}-</span>
                                 <AlunoCard aluno={aluno} />
                             </div>
                         ))
@@ -74,4 +107,3 @@ export default function ListaTodosAlunos() {
 }
 
 
-        

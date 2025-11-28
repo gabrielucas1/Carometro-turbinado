@@ -20,11 +20,11 @@ export default function RelatorioTurma({ turmaId }: { turmaId: string }) {
                 <ul className="space-y-4">
                     {registros.map(registro => (
                         <li key={registro.id} className="border p-4 rounded-lg shadow">
-                            <p><strong>Aluno:</strong> {registro.idAluno}</p>
-                            <p><strong>Descrição:</strong> {registro.descricao}</p>
-                            <p><strong>Professor:</strong> {registro.nomeProfessor}</p>
-                            <p><strong>Data:</strong> {registro.data.toString()}</p>
-                            <p><strong>Tipo:</strong> {registro.tipoRegistro}</p>
+                            <p style={{ color: '#000000' }}><strong>Aluno:</strong> {registro.idAluno}</p>
+                            <p style={{ color: '#000000' }}><strong>Descrição:</strong> {registro.descricao}</p>
+                            <p style={{ color: '#000000' }}><strong>Professor:</strong> {registro.nomeProfessor}</p>
+                            <p style={{ color: '#000000' }}><strong>Data:</strong> {registro.data.toString()}</p>
+                            <p style={{ color: '#000000' }}><strong>Tipo:</strong> {registro.tipoRegistro}</p>
                         </li>
                     ))}
                 </ul>

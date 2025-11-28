@@ -4,17 +4,25 @@ import RegistroProfessorDescricao from "@/model/RegistroProfessorDescricao";
 
 class RegistroProfessorDescricaoDAO {
   async getByAluno(idAluno: string): Promise<RegistroProfessorDescricao[]> {
+    console.log('[DEBUG] Buscando comentários para aluno:', idAluno);
     const q = query(collection(db, "registroProfessorDescricao"), where("aluno.id", "==", idAluno));
     const snapshot = await getDocs(q);
+    console.log('[DEBUG] Comentários encontrados:', snapshot.docs.length);
+    
     return snapshot.docs.map(doc => {
       const data = doc.data();
+      console.log('[DEBUG] Dados do comentário:', data);
+      
       const registro = new RegistroProfessorDescricao();
       registro.id = doc.id;
       registro.observacao = data.observacao;
-      registro.dataCriacao = data.dataCriacao.toDate();
-      registro.dataModificacao = data.dataModificacao.toDate();
+      registro.dataCriacao = data.dataCriacao?.toDate();
+      registro.dataModificacao = data.dataModificacao?.toDate();
       registro.aluno = data.aluno;
       registro.registroProfessor = data.registroProfessor;
+      registro.conselhoClasse = data.conselhoClasse; // Adicionando o campo conselhoClasse
+      
+      console.log('[DEBUG] Registro processado:', registro);
       return registro;
     });
   }
@@ -55,11 +63,11 @@ class RegistroProfessorDescricaoDAO {
         tipoRegistro: registroProfessor.tipoRegistro,
         revisaoGeral: registroProfessor.revisaoGeral,
         data: registroProfessor.data,
-        conselhoClasse: registroProfessor.conselhoClasse ? {
+        conselhoClasse: {
           id: registroProfessor.conselhoClasse.id,
           nome: registroProfessor.conselhoClasse.nome,
           // outros campos simples
-        } : null,
+        } ,
         // outros campos simples que quiser salvar
       };
 
