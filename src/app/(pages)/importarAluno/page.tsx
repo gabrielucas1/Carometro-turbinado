@@ -12,6 +12,7 @@ import Aluno from "@/model/Aluno"; // Importando o tipo Aluno
 import TurmaAluno from "@/model/TurmaAluno";
 import { UserContext } from "@/contexts/UserContext";
 import { useSearchParams } from "next/navigation"; // Substituir useRouter
+import Image from "next/image";
 import AlunoCard from "@/components/AlunoCard"; // Importando o componente AlunoCard
 
 export default function ImportarAluno() {
@@ -59,7 +60,7 @@ export default function ImportarAluno() {
     
     // Estados do arquivo
     const [fileName, setFileName] = useState("");
-    const [alunosImportados, setAlunosImportados] = useState<Student[]>([]);
+    const [alunosImportados, setAlunosImportados] = useState<Aluno[]>([]);
     const [importando, setImportando] = useState(false);
 
     // Carregar cursos na primeira etapa
@@ -144,7 +145,7 @@ export default function ImportarAluno() {
             console.log("[DEBUG] Total de linhas encontradas:", linhas.length);
             console.log("[DEBUG] Linhas:", linhas);
             
-            const alunosParaImportar: Student[] = [];
+            const alunosParaImportar: Aluno[] = [];
             
             // Detectar se primeira linha é cabeçalho
             const primeiraLinha = linhas[0] ? linhas[0].toLowerCase() : "";
@@ -172,18 +173,22 @@ export default function ImportarAluno() {
                 console.log(`[DEBUG] Dados extraídos (${dados.length} campos):`, dados);
                 
                 if (dados.length >= 10) {
-                    const aluno: Aluno = {
-                        nome: dados[0].trim().replace(/"/g, ''),
-                        dataNascimento: dados[1].trim().replace(/"/g, ''),
-                        telefone: dados[2].trim().replace(/"/g, ''),
-                        cep: dados[3].trim().replace(/"/g, ''),
-                        rua: dados[4].trim().replace(/"/g, ''),
-                        numeroEndereco: dados[5].trim().replace(/"/g, ''),
-                        estado: validarEstado(dados[6].trim().replace(/"/g, '')),
-                        cidade: validarCidade(dados[7].trim().replace(/"/g, '')),
-                        bairro: dados[8].trim().replace(/"/g, ''),
-                        complemento: dados[9] ? validarComplemento(dados[9].trim().replace(/"/g, '')) : "",
-                    };
+                    const aluno = new Aluno();
+                    aluno.nome = dados[0].trim().replace(/"/g, '');
+                    aluno.dataNascimento = dados[1].trim().replace(/"/g, '');
+                    aluno.telefone = dados[2].trim().replace(/"/g, '');
+                    aluno.cep = dados[3].trim().replace(/"/g, '');
+                    aluno.rua = dados[4].trim().replace(/"/g, '');
+                    aluno.numeroEndereco = dados[5].trim().replace(/"/g, '');
+                    aluno.estado = validarEstado(dados[6].trim().replace(/"/g, ''));
+                    aluno.cidade = validarCidade(dados[7].trim().replace(/"/g, ''));
+                    aluno.bairro = dados[8].trim().replace(/"/g, '');
+                    aluno.complemento = dados[9] ? validarComplemento(dados[9].trim().replace(/"/g, '')) : "";
+                    // Definir propriedades obrigatórias que serão preenchidas posteriormente
+                    aluno.id = "";
+                    aluno.idTurma = "";
+                    aluno.fotoUrl = "";
+                    aluno.idEscola = "";
                     
                     console.log(`[DEBUG] Aluno processado:`, aluno);
                     
@@ -316,9 +321,11 @@ export default function ImportarAluno() {
                                     >
                                         <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg overflow-hidden">
                                             {curso.fotoUrl ? (
-                                                <img
+                                                <Image
                                                     src={curso.fotoUrl as string}
                                                     alt={curso.nome}
+                                                    width={80}
+                                                    height={80}
                                                     className="object-cover h-full w-full rounded-lg"
                                                 />
                                             ) : (
@@ -363,9 +370,11 @@ export default function ImportarAluno() {
                                     >
                                         <div className="border-gray-900 border-1 bg-white h-full w-20 flex items-center justify-center rounded-lg overflow-hidden">
                                             {turma.fotoUrl ? (
-                                                <img
+                                                <Image
                                                     src={turma.fotoUrl}
                                                     alt={turma.nome}
+                                                    width={80}
+                                                    height={80}
                                                     className="object-cover h-full w-full rounded-lg"
                                                 />
                                             ) : (

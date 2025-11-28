@@ -5,6 +5,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import cursoDAO from "@/DAOs/CursoDAO";
 import Curso from "@/model/Curso";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 export default function EditarCurso() {
     const router = useRouter();
@@ -140,7 +141,7 @@ export default function EditarCurso() {
                         />
                         {valorInput.fotoUrl && !removerFoto && (
                             <div className="mt-2 flex flex-col items-center">
-                                <img src={valorInput.fotoUrl as string} alt="Foto do curso" className="max-h-32 rounded-lg border" />
+                                <Image src={valorInput.fotoUrl as string} alt="Foto do curso" width={128} height={128} className="max-h-32 rounded-lg border" />
                                 <span className="text-xs text-gray-500">Foto atual</span>
                                 <button
                                     type="button"

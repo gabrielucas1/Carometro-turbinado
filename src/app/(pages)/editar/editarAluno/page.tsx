@@ -6,8 +6,9 @@ import Aluno from "@/model/Aluno";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 
-export default function editAluno() {
+export default function EditAluno() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");

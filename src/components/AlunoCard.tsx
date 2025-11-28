@@ -2,6 +2,7 @@ import Aluno from "@/model/Aluno";
 import alunoDAO from "@/DAOs/AlunoDAO";
 import turmaAlunoDAO from "@/DAOs/TurmaAlunoDAO";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import TurmaAluno from "@/model/TurmaAluno";
 import Escola from "@/model/Escola";
@@ -134,8 +135,10 @@ export default function AlunoCard({
                             if (hasFoto) {
                                 console.log("[AlunoCard] Exibindo foto do aluno:", aluno.nome);
                                 return (
-                                    <img 
+                                    <Image 
                                         src={aluno.fotoUrl}
+                                        width={64}
+                                        height={64}
                                         className="w-full h-full object-cover rounded-lg" 
                                         alt={`Foto do Aluno ${aluno.nome}`}
                                         onError={(e) => {

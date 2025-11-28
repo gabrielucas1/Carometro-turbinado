@@ -5,7 +5,8 @@ import Usuario from "@/model/Usuario"
 import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs";
 import { UserContext } from "@/contexts/UserContext";
 import TipoUsuario from "@/model/Enums/TipoUsuario";
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useEffect, useState, useContext } from "react"
 
 export default function PerfilFuncionario() {
@@ -46,9 +47,11 @@ export default function PerfilFuncionario() {
                     {/* Foto do funcionário */}
                     <div className="w-28 h-28 rounded-full bg-blue-200 flex items-center justify-center mb-4 shadow-lg border-4 border-blue-300 overflow-hidden">
                         {usuario.fotoUrl ? (
-                            <img
+                            <Image
                                 src={usuario.fotoUrl}
                                 alt={"Foto do funcionário"}
+                                width={112}
+                                height={112}
                                 className="w-full h-full object-cover"
                             />
                         ) : (

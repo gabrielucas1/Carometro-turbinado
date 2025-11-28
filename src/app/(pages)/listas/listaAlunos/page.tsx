@@ -71,7 +71,7 @@ export default function ListaAlunos() {
       }
     }
     buscarIdCursoDaTurma();
-  }, [idTurma]);
+  }, [idTurma, idCurso]);
 
   // Adicionar listener para recarregar dados quando a página volta ao foco
   useEffect(() => {

@@ -55,15 +55,7 @@ export default function ConselhoPage() {
           // Derivar hora do conselho
           let horaStr = "-";
           try {
-            if (conselho?.hora) {
-              // Caso exista um campo específico de hora
-              if (typeof conselho.hora === 'string') {
-                horaStr = conselho.hora;
-              } else if (typeof conselho.hora === 'object' && 'seconds' in conselho.hora) {
-                const d = new Date((conselho.hora as any).seconds * 1000);
-                horaStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-              }
-            } else if (conselho?.dataCriacao) {
+            if (conselho?.dataCriacao) {
               // Atualizando a lógica para derivar a data de `dataCriacao` com segurança
               let date: Date | null = null;
               if (typeof conselho.dataCriacao === 'object' && 'seconds' in conselho.dataCriacao) {

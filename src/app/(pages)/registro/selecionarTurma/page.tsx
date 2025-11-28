@@ -49,15 +49,3 @@ export default function SelecionarTurmaRegistro() {
         </div>
     );
 }
-
-export function PerfilTurma({ searchParams }: { searchParams: { id: string } }) {
-    const turmaId = searchParams.id;
-
-    return (
-        <div className="p-8">
-            <h1 className="text-3xl font-bold mb-6">Perfil da Turma</h1>
-            {/* Outros detalhes da turma */}
-            <RelatorioTurma turmaId={turmaId} />
-        </div>
-    );
-}

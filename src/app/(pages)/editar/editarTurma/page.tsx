@@ -5,6 +5,7 @@ import turmaDAO from "@/DAOs/TurmaDAO";
 import Turma from "@/model/Turma";
 import Curso from "@/model/Curso";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/firebase"; // ajuste o caminho conforme seu projeto
 
@@ -141,7 +142,7 @@ export default function EditarTurma() {
                     {valorInput.fotoUrl && !removerFoto && (
                         <div className="mt-4 flex flex-col items-center">
                             <p className="mb-2 text-blue-700 font-semibold">Foto atual:</p>
-                            <img src={valorInput.fotoUrl} alt="Foto atual" className="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 shadow" />
+                            <Image src={valorInput.fotoUrl} alt="Foto atual" width={128} height={128} className="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 shadow" />
                             <button
                                 type="button"
                                 onClick={handleRemoverFoto}
