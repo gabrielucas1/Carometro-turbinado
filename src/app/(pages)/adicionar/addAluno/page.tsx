@@ -90,8 +90,6 @@ export default function AddAluno() {
             turmaAluno.aluno = await alunoDAO.getOne(idAluno);
             turmaAluno.turma = turma;
 
-
-
             await turmaAlunoDAO.inserir(turmaAluno);
 
             alert("Aluno adicionado com sucesso!");
