@@ -27,7 +27,7 @@ export default function ListaTodosAlunos() {
 
     useEffect(() => {
         setCarregando(true);
-        async function buscarTodosAlunos() {
+        const buscarTodosAlunos = async () => {
             try {
                 const admEscola = JSON.parse(localStorage.getItem("usuario") || "null");
                 const idEscolaAdm = admEscola?.idEscola?.toString().trim();
@@ -43,7 +43,7 @@ export default function ListaTodosAlunos() {
             } finally {
                 setCarregando(false);
             }
-        }
+        };
         buscarTodosAlunos();
     }, []);
 
@@ -52,7 +52,7 @@ export default function ListaTodosAlunos() {
         const handleVisibilityChange = () => {
             if (!document.hidden && !carregando) {
                 // Página voltou ao foco, recarregar dados
-                async function recarregarTodos() {
+                const recarregarTodos = async () => {
                     setCarregando(true);
                     try {
                         const admEscola = JSON.parse(localStorage.getItem("usuario") || "null");
@@ -65,7 +65,7 @@ export default function ListaTodosAlunos() {
                     } finally {
                         setCarregando(false);
                     }
-                }
+                };
                 recarregarTodos();
             }
         };
