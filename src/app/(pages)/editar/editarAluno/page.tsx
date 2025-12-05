@@ -6,7 +6,6 @@ import Aluno from "@/model/Aluno";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 
 export default function EditAluno() {
     const router = useRouter();
@@ -70,7 +69,7 @@ export default function EditAluno() {
         }));
     }
 
-    async function editarAluno(e: FormEvent) {
+    async function EditarAluno(e: FormEvent) {
         e.preventDefault();
         setCarregando(true);
 
@@ -133,7 +132,7 @@ export default function EditAluno() {
                     <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">🧑‍🎓</span>
                     Editar Aluno
                 </h1>
-                <form onSubmit={editarAluno} className="flex flex-col gap-7">
+                <form onSubmit={EditarAluno} className="flex flex-col gap-7">
                     <div>
                         <label htmlFor="nome" className="block mb-2 text-lg font-semibold text-gray-700">Nome</label>
                         <input

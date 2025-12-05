@@ -7,9 +7,9 @@ import registroProfessorDescricaoDAO from "@/DAOs/RegistroProfessorDescricaoDAO"
 import Aluno from "@/model/Aluno"
 import RegistroVidaAluno from "@/model/RegistroVidaAluno"
 import { getDownloadURL, ref, uploadBytes, getStorage, deleteObject } from "firebase/storage"
+import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
-import { useRouter, useSearchParams } from "next/navigation";
-import NextImage from "next/image";
+import { useRouter, useSearchParams } from "next/navigation"
 import { ChangeEvent, useEffect, useState } from "react"
 import { getFirestore,collection,query,where,getDocs } from "firebase/firestore"
 import Breadcrumbs, { BreadcrumbItem } from "@/components/Breadcrumbs"
@@ -238,7 +238,7 @@ useEffect(() => {
 
         const response = await fetch(aluno.fotoUrl);
         const blob = await response.blob();
-        const img = new globalThis.Image();
+        const img = new Image();
         img.src = URL.createObjectURL(blob);
         doc.addImage(img, 'JPEG', 20, 40, 50, 50);
 
@@ -417,7 +417,7 @@ useEffect(() => {
                     <label className="block mb-2 text-lg font-semibold text-gray-700">Foto do Aluno</label>
                     {valorInput.fotoUrl && !removerFoto && (
                         <div className="mt-2 flex flex-col items-center">
-                            <NextImage src={valorInput.fotoUrl as string} alt="Foto do aluno" width={128} height={128} className="max-h-32 rounded-lg border" />
+                            <img src={valorInput.fotoUrl as string} alt="Foto do aluno" className="max-h-32 rounded-lg border" />
                             <span className="text-xs text-gray-500">Foto atual</span>
                             <button
                                 type="button"
