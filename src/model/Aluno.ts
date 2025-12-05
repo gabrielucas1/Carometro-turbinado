@@ -14,7 +14,7 @@ export default class Aluno {
     cidade: string;
     complemento: string;
     fotoUrl: string;
-    idEscola?: string;
+    idEscola: string;
 
     constructor() {
         this.id = "";

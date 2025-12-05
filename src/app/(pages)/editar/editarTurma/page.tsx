@@ -5,6 +5,7 @@ import turmaDAO from "@/DAOs/TurmaDAO";
 import Turma from "@/model/Turma";
 import Curso from "@/model/Curso";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/firebase"; // ajuste o caminho conforme seu projeto
 
@@ -30,7 +31,7 @@ export default function EditarTurma() {
                     setValorInput({
                         nome: turma.nome,
                         ano: turma.ano,
-                        idCurso: turma.curso.id,
+                        idCurso: turma.idCurso || (turma.curso ? turma.curso.id : ""),
                         fotoUrl: turma.fotoUrl || ""
                     });
                 })
@@ -67,28 +68,36 @@ export default function EditarTurma() {
             return;
         }
         try {
+            console.log("[EditarTurma] Iniciando atualização da turma...");
             const turma = new Turma();
-            turma.id = id;
+            turma.idTurma = id;
             turma.nome = valorInput.nome;
             turma.ano = valorInput.ano;
+            turma.idCurso = valorInput.idCurso;
             const curso = new Curso();
             curso.id = valorInput.idCurso;
             turma.curso = curso;
+            console.log("[EditarTurma] Dados antes da foto:", turma);
             if (removerFoto) {
                 turma.fotoUrl = "";
+                console.log("[EditarTurma] Foto removida.");
             } else if (novaFoto) {
                 const storageRef = ref(storage, `turmas/${id}/${novaFoto.name}`);
+                console.log("[EditarTurma] Fazendo upload da nova foto:", novaFoto.name);
                 await uploadBytes(storageRef, novaFoto);
                 turma.fotoUrl = await getDownloadURL(storageRef);
+                console.log("[EditarTurma] Nova fotoUrl obtida:", turma.fotoUrl);
             } else {
                 turma.fotoUrl = valorInput.fotoUrl;
+                console.log("[EditarTurma] Mantendo foto atual:", turma.fotoUrl);
             }
-            console.log("Salvando turma com fotoUrl:", turma.fotoUrl);
+            console.log("[EditarTurma] Dados finais da turma para update:", turma);
             await turmaDAO.update(turma);
+            console.log("[EditarTurma] Turma atualizada com sucesso!");
             alert("Turma atualizada com sucesso!");
             router.back();
         } catch (e: any) {
-            console.error("Erro ao atualizar turma:", e.message);
+            console.error("[EditarTurma] Erro ao atualizar turma:", e);
             alert("Erro ao atualizar turma!");
         } finally {
             setCarregando(false);
@@ -133,7 +142,7 @@ export default function EditarTurma() {
                     {valorInput.fotoUrl && !removerFoto && (
                         <div className="mt-4 flex flex-col items-center">
                             <p className="mb-2 text-blue-700 font-semibold">Foto atual:</p>
-                            <img src={valorInput.fotoUrl} alt="Foto atual" className="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 shadow" />
+                            <Image src={valorInput.fotoUrl} alt="Foto atual" width={128} height={128} className="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 shadow" />
                             <button
                                 type="button"
                                 onClick={handleRemoverFoto}

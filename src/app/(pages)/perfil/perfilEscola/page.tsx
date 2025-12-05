@@ -84,7 +84,7 @@ export default function PerfilEscola() {
             .catch((e) => {
                 console.error("Erro ao carregar os dados da escola:", e.message);
             });
-    }, [id, usuarioLogado, carregando])
+    }, [id, usuarioLogado, carregando, router])
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
         const { id, value } = event.target;

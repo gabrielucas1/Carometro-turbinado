@@ -7,11 +7,12 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function editAluno() {
+export default function EditAluno() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const [carregando, setCarregando] = useState(true);
+    const [alunoOriginal, setAlunoOriginal] = useState<Aluno | null>(null);
 
     const [valorInput, setValorInput] = useState({
         nome: "",
@@ -33,6 +34,7 @@ export default function editAluno() {
         if (id) {
             alunoDAO.getOne(id)
                 .then((aluno) => {
+                    setAlunoOriginal(aluno);
                     setValorInput({
                         nome: aluno.nome,
                         dataNascimento: aluno.dataNascimento,
@@ -67,7 +69,7 @@ export default function editAluno() {
         }));
     }
 
-    async function editarAluno(e: FormEvent) {
+    async function EditarAluno(e: FormEvent) {
         e.preventDefault();
         setCarregando(true);
 
@@ -77,6 +79,11 @@ export default function editAluno() {
         }
 
         try {
+            if (!alunoOriginal) {
+                alert("Dados do aluno não carregados!");
+                return;
+            }
+
             const aluno = new Aluno();
             aluno.id = id;
             aluno.nome = valorInput.nome;
@@ -89,6 +96,9 @@ export default function editAluno() {
             aluno.estado = valorInput.estado;
             aluno.cidade = valorInput.cidade;
             aluno.complemento = valorInput.complemento;
+            // Preservar campos importantes do aluno original
+            aluno.idTurma = alunoOriginal.idTurma;
+            aluno.idEscola = alunoOriginal.idEscola;
 
             // Se uma nova foto foi selecionada, fazer upload
             if (valorInput.foto) {
@@ -122,7 +132,7 @@ export default function editAluno() {
                     <span className="inline-block bg-blue-100 rounded-full p-2 text-blue-600">🧑‍🎓</span>
                     Editar Aluno
                 </h1>
-                <form onSubmit={editarAluno} className="flex flex-col gap-7">
+                <form onSubmit={EditarAluno} className="flex flex-col gap-7">
                     <div>
                         <label htmlFor="nome" className="block mb-2 text-lg font-semibold text-gray-700">Nome</label>
                         <input

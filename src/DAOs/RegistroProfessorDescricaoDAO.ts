@@ -4,35 +4,86 @@ import RegistroProfessorDescricao from "@/model/RegistroProfessorDescricao";
 
 class RegistroProfessorDescricaoDAO {
   async getByAluno(idAluno: string): Promise<RegistroProfessorDescricao[]> {
+    console.log('[DEBUG] Buscando comentários para aluno:', idAluno);
     const q = query(collection(db, "registroProfessorDescricao"), where("aluno.id", "==", idAluno));
     const snapshot = await getDocs(q);
+    console.log('[DEBUG] Comentários encontrados:', snapshot.docs.length);
+    
     return snapshot.docs.map(doc => {
       const data = doc.data();
+      console.log('[DEBUG] Dados do comentário:', data);
+      
       const registro = new RegistroProfessorDescricao();
       registro.id = doc.id;
       registro.observacao = data.observacao;
-      registro.dataCriacao = data.dataCriacao.toDate();
-      registro.dataModificacao = data.dataModificacao.toDate();
+      registro.dataCriacao = data.dataCriacao?.toDate();
+      registro.dataModificacao = data.dataModificacao?.toDate();
       registro.aluno = data.aluno;
       registro.registroProfessor = data.registroProfessor;
+      registro.conselhoClasse = data.conselhoClasse; // Adicionando o campo conselhoClasse
+      
+      console.log('[DEBUG] Registro processado:', registro);
       return registro;
     });
   }
 
   async inserir(registro: any) {
     try {
+      const { aluno, registroProfessor, conselhoClasse, ...dadosRegistro } = registro;
+
+      // Transforma aluno em objeto simples
+      const alunoObj = {
+        id: aluno.id,
+        nome: aluno.nome,
+        // outros campos simples que quiser salvar
+      };
+
+      // Transforma conselhoClasse em objeto simples
+      const conselhoClasseObj = {
+        id: conselhoClasse.id,
+        nome: conselhoClasse.nome,
+        // outros campos simples que quiser salvar
+      };
+
+      // Transforma registroProfessor em objeto simples
+      const registroProfessorObj = {
+        id: registroProfessor.id,
+        disciplina: registroProfessor.disciplina,
+        periodo: registroProfessor.periodo,
+        turma: registroProfessor.turma ? {
+          id: registroProfessor.turma.id ?? "",
+          nome: registroProfessor.turma.nome ?? "",
+          // outros campos simples de turma
+        } : null,
+        usuario: registroProfessor.usuario ? {
+          id: registroProfessor.usuario.id,
+          nome: registroProfessor.usuario.nome,
+          // outros campos simples de usuario
+        } : null,
+        tipoRegistro: registroProfessor.tipoRegistro,
+        revisaoGeral: registroProfessor.revisaoGeral,
+        data: registroProfessor.data,
+        conselhoClasse: {
+          id: registroProfessor.conselhoClasse.id,
+          nome: registroProfessor.conselhoClasse.nome,
+          // outros campos simples
+        } ,
+        // outros campos simples que quiser salvar
+      };
+
       console.log("[DEBUG] Dados enviados para Firestore:", {
-        aluno: registro.aluno,
-        registroProfessor: registro.registroProfessor,
-        conselhoClasse: registro.conselhoClasse,
+        aluno: alunoObj,
+        registroProfessor: registroProfessorObj,
+        conselhoClasse: conselhoClasseObj,
         observacao: registro.observacao,
         dataCriacao: registro.dataCriacao,
         dataModificacao: registro.dataModificacao,
       });
+
       await addDoc(collection(db, "registroProfessorDescricao"), {
-        aluno: registro.aluno,
-        registroProfessor: registro.registroProfessor,
-        conselhoClasse: registro.conselhoClasse,
+        aluno: alunoObj,
+        registroProfessor: registroProfessorObj,
+        conselhoClasse: conselhoClasseObj,
         observacao: registro.observacao,
         dataCriacao: registro.dataCriacao,
         dataModificacao: registro.dataModificacao,

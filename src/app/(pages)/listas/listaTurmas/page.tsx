@@ -64,7 +64,7 @@ export default function ListaTurmas() {
                     ) : (
                         listaTurmas.map((turma) => (
                             <div
-                                key={turma.id}
+                                key={turma.idTurma}
                                 className="flex items-center justify-center w-full max-w-lg"
                             >
                                 {/* Renderiza o card da turma */}

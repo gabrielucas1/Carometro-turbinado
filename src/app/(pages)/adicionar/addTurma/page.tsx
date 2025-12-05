@@ -37,6 +37,8 @@ export default function AddCurso() {
         const turma = new Turma();
         turma.nome = valorInput.nome;
         turma.curso = await cursoDAO.getOne(idCurso!);
+        turma.escola.id = turma.curso.escola.id
+        turma.idCurso = idCurso!; // Adiciona o ID do curso
         turma.ano = valorInput.ano;
 
         // Upload da imagem, se houver

@@ -1,7 +1,8 @@
 import Curso from "./Curso"
 
 export default class Turma{
-    id: string
+    idCurso: string
+    idTurma: string
     nome: string
     curso: Curso
     ano: string
@@ -9,7 +10,8 @@ export default class Turma{
     fotoUrl: string
 
     constructor() {
-        this.id = ""
+        this.idCurso = ""
+         this.idTurma = ""
         this.nome = ""
         this.curso = new Curso
         this.ano = ""

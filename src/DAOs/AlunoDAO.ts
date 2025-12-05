@@ -30,32 +30,46 @@ class AlunoDAO {
 
     //GETONE
     async getOne(id: string): Promise<Aluno> {
-        const aluno = new Aluno();
+        try {
+            console.log("[DEBUG] AlunoDAO.getOne - Buscando aluno com ID:", id);
 
-        const docRef = doc(db, "aluno", id);
-        const querySnapshot = await getDoc(docRef);
-        if (querySnapshot.exists()) {
+            if (!id) {
+                throw new Error("ID do aluno não fornecido");
+            }
+
+            const docRef = doc(db, "aluno", id);
+            const querySnapshot = await getDoc(docRef);
+
+            if (!querySnapshot.exists()) {
+                console.error(`[ERROR] AlunoDAO.getOne - Aluno não encontrado! ID: ${id}`);
+                throw new Error(`Aluno não encontrado! ID: ${id}`);
+            }
+
             const data = querySnapshot.data();
+            console.log("[DEBUG] AlunoDAO.getOne - Dados do aluno:", data);
 
+            const aluno = new Aluno();
             aluno.id = querySnapshot.id;
-            aluno.idTurma = data.idTurma;
-            aluno.nome = data.nome;
-            aluno.dataNascimento = data.dataNascimento;
-            aluno.telefone = data.telefone;
-            aluno.cep = data.cep;
-            aluno.rua = data.rua;
-            aluno.bairro = data.bairro;
-            aluno.numeroEndereco = data.numeroEndereco;
-            aluno.estado = data.estado;
-            aluno.cidade = data.cidade;
-            aluno.complemento = data.complemento;
-            aluno.fotoUrl = data.fotoUrl; // Adicionar fotoUrl
-            
-        } else {
-            throw new Error('Erro ao buscar aluno!');
-        }
+            aluno.idTurma = data.idTurma || "";
+            aluno.idEscola = data.idEscola || ""; // Garantir que o idEscola seja carregado
+            aluno.nome = data.nome || "";
+            aluno.dataNascimento = data.dataNascimento || null;
+            aluno.telefone = data.telefone || "";
+            aluno.cep = data.cep || "";
+            aluno.rua = data.rua || "";
+            aluno.bairro = data.bairro || "";
+            aluno.numeroEndereco = data.numeroEndereco || "";
+            aluno.estado = data.estado || "";
+            aluno.cidade = data.cidade || "";
+            aluno.complemento = data.complemento || "";
+            aluno.fotoUrl = data.fotoUrl || ""; 
 
-        return aluno;
+            console.log("[DEBUG] AlunoDAO.getOne - Aluno montado:", aluno);
+            return aluno;
+        } catch (error) {
+            console.error("[ERROR] AlunoDAO.getOne - Erro ao buscar aluno:", error);
+            throw error;
+        }
     }
 
     async getByTurmaId(idTurma: string): Promise<Aluno[]> {
@@ -97,7 +111,18 @@ class AlunoDAO {
                 const aluno: Aluno = new Aluno();
                 aluno.id = doc.id;
                 aluno.nome = data.nome;
-                aluno.email = data.email;
+                aluno.dataNascimento = data.dataNascimento;
+                aluno.telefone = data.telefone;
+                aluno.cep = data.cep;
+                aluno.rua = data.rua;
+                aluno.bairro = data.bairro;
+                aluno.numeroEndereco = data.numeroEndereco;
+                aluno.estado = data.estado;
+                aluno.cidade = data.cidade;
+                aluno.complemento = data.complemento;
+                aluno.fotoUrl = data.fotoUrl; // IMPORTANTE: Incluir fotoUrl
+                aluno.idTurma = data.idTurma;
+                aluno.idEscola = data.idEscola;
                 alunos.push(aluno);
             }
         }

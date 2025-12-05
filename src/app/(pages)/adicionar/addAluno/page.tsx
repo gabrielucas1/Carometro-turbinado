@@ -6,8 +6,6 @@ import turmaDAO from "@/DAOs/TurmaDAO";
 import turmaAlunoDAO from "@/DAOs/TurmaAlunoDAO";
 import Aluno from "@/model/Aluno";
 import TurmaAluno from "@/model/TurmaAluno";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/firebase/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AddAluno() {
@@ -74,10 +72,15 @@ export default function AddAluno() {
         try {
             let fotoUrl = "";
             if (valorInput.foto) {
-                // Upload da foto para o Firebase Storage
-                const storageRef = ref(storage, `alunos/${valorInput.foto.name}`);
-                await uploadBytes(storageRef, valorInput.foto);
-                fotoUrl = await getDownloadURL(storageRef);
+                // Converter para base64 (solução alternativa ao Firebase Storage)
+                const reader = new FileReader();
+                const base64Promise = new Promise<string>((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = () => reject(new Error("Erro ao ler arquivo"));
+                    reader.readAsDataURL(valorInput.foto!);
+                });
+                
+                fotoUrl = await base64Promise;
             }
 
             aluno.fotoUrl = fotoUrl; // Adicione a URL da foto ao aluno

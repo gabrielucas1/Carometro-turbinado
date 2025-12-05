@@ -29,8 +29,15 @@ export default function SelecionarTurmaRegistro() {
                     {turmas.length === 0 && <p className="text-lg text-gray-500 text-center">Nenhuma turma encontrada para este curso.</p>}
                     {turmas.map(turma => (
                         <button
-                            key={turma.id}
-                            onClick={() => router.push(`/perfil/perfilTurma?id=${turma.id}`)}
+                            key={turma.idTurma}
+                            onClick={() => {
+                                console.log("Navegando para turma com ID:", turma.idTurma);
+                                if (!turma.idTurma) {
+                                    console.error("ID da turma não encontrado");
+                                    return;
+                                }
+                                router.push(`/perfil/perfilTurma?id=${encodeURIComponent(turma.idTurma)}`);
+                            }}
                             className="flex items-center gap-4 bg-green-100 text-green-900 px-8 py-5 rounded-2xl shadow hover:bg-green-200 transition-all border border-green-200 font-bold text-xl"
                         >
                             <span className="text-3xl">🏫</span>
@@ -39,18 +46,6 @@ export default function SelecionarTurmaRegistro() {
                     ))}
                 </div>
             </div>
-        </div>
-    );
-}
-
-export function PerfilTurma({ searchParams }: { searchParams: { id: string } }) {
-    const turmaId = searchParams.id;
-
-    return (
-        <div className="p-8">
-            <h1 className="text-3xl font-bold mb-6">Perfil da Turma</h1>
-            {/* Outros detalhes da turma */}
-            <RelatorioTurma turmaId={turmaId} />
         </div>
     );
 }

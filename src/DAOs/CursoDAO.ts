@@ -22,33 +22,29 @@ class CursoDAO {
 
     //GETONE
     async getOne(id: string): Promise<Curso> {
+        console.log("[CursoDAO.getOne] Buscando curso com id:", id); // Log do id buscado
         const curso = new Curso()
-
         const docRef = doc(db, "curso", id)
         const querySnapshot = await getDoc(docRef)
         if (querySnapshot.exists()) {
             const data = querySnapshot.data()
-            console.log("Dados do curso encontrados:", data); // Log para verificar os dados do curso
-
-            curso.id = querySnapshot.id
-            curso.nome = data.nome
+            console.log("[CursoDAO.getOne] Dados do curso encontrados:", data); // Log para verificar os dados do curso
+            curso.id = querySnapshot.id;
+            curso.idEscola = data.idEscola;
+            curso.nome = data.nome;
             curso.fotoUrl = data.fotoUrl || "";
             if(data.idEscola && typeof data.idEscola === "string") {
                 curso.escola = await escolaDAO.getOne(data.idEscola)
-             curso.escola.id = data.idEscola; // Adiciona o ID da escola ao objeto
-
+                curso.escola.id = data.idEscola; // Adiciona o ID da escola ao objeto
+            } else {
+                console.error("[CursoDAO.getOne] Campo idEscola não encontrado no curso!", data);
+                throw new Error("Erro ao buscar a escola associada ao curso!");
             }
-            else{
-            console.error("Campo idEscola não encontrado no curso!");
-            throw new Error("Erro ao buscar a escola associada ao curso!");
-
-            }
-            curso.turno = data.turno
-
+            curso.turno = data.turno;
         } else {
+            console.error(`[CursoDAO.getOne] Curso com id '${id}' não encontrado!`);
             throw new Error('Erro ao buscar curso!')
         }
-
         return curso;
     }
 
@@ -73,9 +69,10 @@ class CursoDAO {
 
             const curso: Curso = new Curso();
             curso.id = doc.id;
+            curso.idEscola = data.idEscola;
             curso.nome = data.nome;
             curso.turno = data.turno;
-            curso.fotoUrl = data.fotoUrl; // fiz certo?
+            curso.fotoUrl = data.fotoUrl;
 
             if (data.idEscola && escolasMap[data.idEscola]) {
                 curso.escola = escolasMap[data.idEscola]; // Usa o mapa de escolas

@@ -37,48 +37,71 @@ export default function PerfilTurma() {
     //[key: string]: string DEFINE QUE O OBJETO TERÁ APENAS STRINGS
     const [observacoes, setObservacoes] = useState<{ [key: string]: string }>({})
 
-    //PEGANDO ID DA ESCOLA QUE VEIO DA TELA LISTA ALUNOS
+    //PEGANDO ID DA TURMA QUE VEIO DA URL
     const searchParams = useSearchParams()
     const id = searchParams.get('id')
 
     useEffect(() => {
-        if (id) {
-            // Buscar a turma
-            turmaDAO.getOne(id).then((turmaBuscada) => {
-                console.log("Turma buscada:", turmaBuscada);
+        const carregarDados = async () => {
+            console.log("[DEBUG] ID da turma recebido:", id);
+            
+            if (!id || id === 'undefined') {
+                console.error("[ERROR] ID da turma inválido");
+                alert("ID da turma inválido");
+                router.push('/cursos');
+                return;
+            }
+
+            try {
+                // Buscar a turma
+                console.log("[DEBUG] Buscando turma com ID:", id);
+                const turmaBuscada = await turmaDAO.getOne(id);
+                console.log("[DEBUG] Turma buscada:", turmaBuscada);
+                
+                if (!turmaBuscada) {
+                    throw new Error("Turma não encontrada");
+                }
+                
                 setTurma(turmaBuscada);
                 setNome(turmaBuscada.nome);
-            }).catch((e) => {
-                console.log(e.message);
-            });
 
-            // Buscar os alunos da turma
-            turmaAlunoDAO.getAlunos(id).then(async (alunos) => {
-                console.log("Alunos encontrados:", alunos);
-                setAlunos(alunos);
+                // Buscar os alunos da turma
+                console.log("[DEBUG] Buscando alunos da turma:", id);
+                const alunosBuscados = await turmaAlunoDAO.getAlunos(id);
+                console.log("[DEBUG] Alunos encontrados:", alunosBuscados);
+                setAlunos(alunosBuscados);
+
+                // Buscar registros dos alunos
                 const registrosTemp: RegistroVidaAluno[] = [];
-                for (const aluno of alunos) {
+                for (const aluno of alunosBuscados) {
                     try {
-                        const registros: RegistroVidaAluno[] = await registroVidaAlunoDAO.getAllByAlunoAndTurma(aluno.id, id);
-                        console.log(`Registros do aluno ${aluno.id} na turma ${id}:`, registros);
+                        console.log(`[DEBUG] Buscando registros do aluno ${aluno.id} na turma ${id}`);
+                        const registros = await registroVidaAlunoDAO.getAllByAlunoAndTurma(aluno.id, id);
+                        console.log(`[DEBUG] Registros encontrados para aluno ${aluno.id}:`, registros);
                         registrosTemp.push(...registros);
-                    } catch (e: any) {
-                        console.log(`Erro ao buscar registro para o aluno ${aluno.id} na turma ${id}: ${e.message}`);
+                    } catch (error) {
+                        console.error(`[ERROR] Erro ao buscar registros do aluno ${aluno.id}:`, error);
                     }
                 }
                 setRegistrosAluno(registrosTemp);
-            }).catch((e) => {
-                console.log(e.message);
-            });
 
-            // Buscar os registros de professor da turma
-            registroProfessorTurmaDAO.getAll().then((registros) => {
-                console.log("Registros de professor da turma:", registros);
-                setRegistrosTurma(registros);
-            }).catch((e) => {
-                console.log(e.message);
-            });
+                // Buscar registros do professor da turma
+                console.log("[DEBUG] Buscando registros do professor da turma");
+                const todosRegistros = await registroProfessorTurmaDAO.getAll();
+                const registrosFiltrados = todosRegistros.filter(registro => 
+                    registro.turma.idTurma === id || registro.turma.idTurma === id
+                );
+                console.log("[DEBUG] Registros do professor filtrados:", registrosFiltrados);
+                setRegistrosTurma(registrosFiltrados);
+
+            } catch (error: any) {
+                console.error("[ERROR] Erro ao carregar dados:", error);
+                const mensagem = error?.message ?? String(error);
+                alert(`Erro ao carregar dados: ${mensagem}`);
+            }
         }
+
+        carregarDados();
     }, [id]);
 
     function getInput(event: ChangeEvent<HTMLInputElement>) {
@@ -88,12 +111,14 @@ export default function PerfilTurma() {
     async function salvar(e: ChangeEvent<HTMLFormElement>) {
         e.preventDefault()
         try {
-            const turmaAtualizada = new Turma
-            turmaAtualizada.nome = nome
-            turmaAtualizada.curso = turma.curso
-            turmaAtualizada.id = turma.id
-
-            await turmaDAO.update(turmaAtualizada)
+            const turmaAtualizada = new Turma();
+            turmaAtualizada.nome = nome;
+            turmaAtualizada.curso = turma.curso;
+            turmaAtualizada.idTurma = turma.idTurma;
+            turmaAtualizada.idCurso = turma.idCurso;
+            
+            console.log("[DEBUG] Atualizando turma:", turmaAtualizada);
+            await turmaDAO.update(turmaAtualizada);
         } catch (e: any) {
             console.log(e.message)
         }
@@ -101,9 +126,15 @@ export default function PerfilTurma() {
 
     async function excluir() {
         try {
-            await turmaDAO.deletar(turma.id)
-        } catch (e: any) {
-            console.log(e.message)
+            if (!turma.idTurma) {
+                throw new Error("ID da turma não encontrado");
+            }
+            console.log("[DEBUG] Excluindo turma:", turma.idTurma);
+            await turmaDAO.deletar(turma.idTurma);
+            router.push('/cursos');
+        } catch (error: any) {
+            console.error("[ERROR] Erro ao excluir turma:", error);
+            alert(`Erro ao excluir turma: ${error.message}`);
         }
     }
 
@@ -186,11 +217,15 @@ export default function PerfilTurma() {
             yPosition += lineHeight * 2;
 
             // Adicionar registros da turma primeiro
-            if (registrosTurma.filter(r => r.turma.id === turma.id).length > 0) {
+            const registrosDaTurma = registrosTurma.filter(r => 
+                r.turma.idTurma === turma.idTurma || r.turma.idTurma === turma.idTurma
+            );
+            
+            if (registrosDaTurma.length > 0) {
                 doc.text('=== REGISTROS DA TURMA ===', xPosition, yPosition);
                 yPosition += lineHeight;
 
-                registrosTurma.filter(r => r.turma.id === turma.id).forEach((registro) => {
+                registrosDaTurma.forEach((registro) => {
                     // Verificar se há espaço suficiente
                     if (yPosition + lineHeight * 4 > pageHeight - 10) {
                         doc.addPage();
@@ -263,7 +298,7 @@ export default function PerfilTurma() {
                 }
             }
 
-            if (registrosTurma.filter(r => r.turma.id === turma.id).length === 0 && registrosAluno.length === 0) {
+            if (registrosTurma.filter(r => r.turma.idTurma === turma.idTurma).length === 0 && registrosAluno.length === 0) {
                 doc.text('Nenhum registro encontrado para esta turma.', xPosition, yPosition);
             }
 
@@ -298,8 +333,8 @@ export default function PerfilTurma() {
                 <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mb-10">
                     <h2 className="text-2xl font-bold text-blue-700 mb-6">Registros da Turma</h2>
                     <div className="flex flex-col gap-4 items-center">
-                        {registrosTurma.filter(r => r.turma.id === turma.id).length > 0 ? (
-                            registrosTurma.filter(r => r.turma.id === turma.id).map((registro) => (
+                        {registrosTurma.filter(r => r.turma.idTurma === turma.idTurma).length > 0 ? (
+                            registrosTurma.filter(r => r.turma.idTurma === turma.idTurma).map((registro) => (
                                 <div key={registro.id} className="bg-blue-100 rounded-xl p-4 shadow flex flex-col gap-2 w-full max-w-md border border-blue-300">
                                     <span className="font-bold text-lg text-blue-700">Tipo: {registro.tipoRegistro}</span>
                                     <span className="text-gray-600">{registro.revisaoGeral}</span>
