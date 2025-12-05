@@ -13,7 +13,6 @@ export default function AddAluno() {
     const searchParams = useSearchParams(); // kook para pegar os parâmetros da URL
     const idTurma = searchParams.get("idTurma"); // Captura o ID da turma da URL
 
-    console.log("ID da turma: ", idTurma);
 
     const [valorInput, setValorInput] = useState({
         nome: "",
@@ -91,15 +90,14 @@ export default function AddAluno() {
             turmaAluno.aluno = await alunoDAO.getOne(idAluno);
             turmaAluno.turma = turma;
 
-            console.log(`ALUNO ID: ${turmaAluno.aluno.id}`);
-            console.log(`TURMA ID: ${turmaAluno.turma.id}`);
+
 
             await turmaAlunoDAO.inserir(turmaAluno);
 
             alert("Aluno adicionado com sucesso!");
             router.push(`/listas/listaAlunos?idTurma=${idTurma}`);
         } catch (e: any) {
-            console.log(e.message);
+
             alert("Erro ao adicionar aluno.");
         }
     }
