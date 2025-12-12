@@ -3,6 +3,7 @@
 import turmaAlunoDAO from "@/DAOs/TurmaAlunoDAO"
 import turmaDAO from "@/DAOs/TurmaDAO"
 import registroProfessorTurmaDAO from "@/DAOs/RegistroProfessorTurmaDAO"
+import conselhoClasseDAO from "@/DAOs/ConselhoClasseDAO"
 import Aluno from "@/model/Aluno"
 import Turma from "@/model/Turma"
 import RegistroProfessorTurma from "@/model/RegistroProfessorTurma"
@@ -130,6 +131,16 @@ export default function PerfilTurma() {
                 throw new Error("ID da turma não encontrado");
             }
             console.log("[DEBUG] Excluindo turma:", turma.idTurma);
+            
+            // Buscar e excluir conselhos associados à turma
+            const conselhos = await conselhoClasseDAO.obterPorIdTurma(turma.idTurma);
+            for (const conselho of conselhos) {
+                if (conselho.idConselho) {
+                    console.log("[DEBUG] Excluindo conselho:", conselho.idConselho);
+                    await conselhoClasseDAO.deletar(conselho.idConselho);
+                }
+            }
+            
             await turmaDAO.deletar(turma.idTurma);
             router.push('/cursos');
         } catch (error: any) {
