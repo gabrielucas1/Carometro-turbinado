@@ -135,9 +135,9 @@ export default function PerfilTurma() {
             // Buscar e excluir conselhos associados à turma
             const conselhos = await conselhoClasseDAO.obterPorIdTurma(turma.idTurma);
             for (const conselho of conselhos) {
-                if (conselho.idConselho) {
-                    console.log("[DEBUG] Excluindo conselho:", conselho.idConselho);
-                    await conselhoClasseDAO.deletar(conselho.idConselho);
+                if (conselho.id) {
+                    console.log("[DEBUG] Excluindo conselho:", conselho.id);
+                    await conselhoClasseDAO.deletar(conselho.id);
                 }
             }
             

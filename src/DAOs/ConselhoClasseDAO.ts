@@ -1,13 +1,10 @@
 import { db } from "@/firebase/firebase";
-import { collection, doc, getDocs, getDoc, addDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, addDoc, deleteDoc, query, where, Timestamp } from "firebase/firestore";
 import ConselhoClasse from "@/model/ConselhoClasse";
 
 class ConselhoClasseDAO {
   async inserir(conselho: ConselhoClasse) {
     try {
-      console.log("[DEBUG] ConselhoClasseDAO.inserir - Iniciando inserção");
-      console.log("[DEBUG] ConselhoClasseDAO.inserir - Conselho recebido:", conselho);
-      console.log("[DEBUG] ConselhoClasseDAO.inserir - Campo hora:", (conselho as any).hora);
       
       const turmaObj = conselho.turma;
       const conselhoData: any = {
@@ -20,10 +17,8 @@ class ConselhoClasseDAO {
       // Adicionar hora se existir (propriedade dinâmica)
       if ((conselho as any).hora) {
         conselhoData.hora = (conselho as any).hora;
-        console.log("[DEBUG] ConselhoClasseDAO.inserir - Hora adicionada aos dados:", conselhoData.hora);
       }
 
-      console.log("[DEBUG] ConselhoClasseDAO.inserir - Dados a serem salvos:", conselhoData);
       
       const docRef = await addDoc(collection(db, "conselhoClasse"), conselhoData);
       
@@ -127,6 +122,63 @@ class ConselhoClasseDAO {
       return conselhos;
     } catch (error) {
       console.error("[ERROR] ConselhoClasseDAO.getAll - Erro:", error);
+      throw error;
+    }
+  }
+
+  async obterPorIdTurma(idTurma: string): Promise<ConselhoClasse[]> {
+    try {
+      console.log("[DEBUG] ConselhoClasseDAO.obterPorIdTurma - Buscando conselhos da turma:", idTurma);
+      const snapshot = await getDocs(collection(db, "conselhoClasse"));
+      const conselhos: ConselhoClasse[] = [];
+      
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        // Verifica se o conselho pertence à turma
+        const turmaId = data.turma?.idTurma || data.turma?.id || 
+          (typeof data.turma === "string" ? data.turma.split("/").pop() : null);
+        
+        if (turmaId === idTurma) {
+          const conselho = new ConselhoClasse();
+          conselho.id = docSnap.id;
+          (conselho as any).idConselho = docSnap.id; // Para compatibilidade
+          conselho.nome = data.nome;
+          
+          const Turma = (await import("@/model/Turma")).default;
+          if (data.turma && typeof data.turma === "object") {
+            conselho.turma = Object.assign(new Turma(), { 
+              idTurma: data.turma.idTurma || data.turma.id, 
+              nome: data.turma.nome 
+            });
+          }
+          
+          conselho.dataCriacao = data.dataCriacao?.toDate ? data.dataCriacao.toDate() : new Date();
+          conselho.dataModificacao = data.dataModificacao?.toDate ? data.dataModificacao.toDate() : new Date();
+          
+          if (data.hora) {
+            (conselho as any).hora = data.hora;
+          }
+          
+          conselhos.push(conselho);
+        }
+      }
+      
+      console.log("[DEBUG] ConselhoClasseDAO.obterPorIdTurma - Encontrados:", conselhos.length);
+      return conselhos;
+    } catch (error) {
+      console.error("[ERROR] ConselhoClasseDAO.obterPorIdTurma - Erro:", error);
+      throw error;
+    }
+  }
+
+  async deletar(id: string): Promise<void> {
+    try {
+      console.log("[DEBUG] ConselhoClasseDAO.deletar - Excluindo conselho:", id);
+      const docRef = doc(db, "conselhoClasse", id);
+      await deleteDoc(docRef);
+      console.log("[DEBUG] ConselhoClasseDAO.deletar - Conselho excluído com sucesso");
+    } catch (error) {
+      console.error("[ERROR] ConselhoClasseDAO.deletar - Erro:", error);
       throw error;
     }
   }
